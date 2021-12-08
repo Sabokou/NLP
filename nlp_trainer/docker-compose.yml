@@ -18,6 +18,12 @@ services:
             - 1234:8080
         depends_on:
             - "db"
+
+    memcached:
+        image: 'memcached'
+        ports:
+            - '11211:11211'
+        restart: always
         
     app:
         build: ./app
@@ -27,3 +33,4 @@ services:
             - ./app:/usr/src/app
         depends_on:
             - "db"
+            - memcached
