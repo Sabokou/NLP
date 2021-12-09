@@ -26,11 +26,11 @@ services:
         restart: always
         
     app:
-        build: ./app
+        build: .
         ports: 
-            - 5001:80
-        volumes:
-            - ./app:/usr/src/app
+            - 5000:5000
+#        volumes:
+#            - ./app:/usr/src/app
         depends_on:
             - "db"
             - memcached

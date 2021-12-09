@@ -5,7 +5,7 @@ FROM python:3.10-slim
 WORKDIR /src
 
 # copy folder into working directory
-COPY ./ /src
+COPY . /src
 
 # install requirements
 COPY requirements.txt requirements.txt
