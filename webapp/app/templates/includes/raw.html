@@ -61,6 +61,16 @@
                             </a>
                     </li>
                     <li class="nav-item">
+                        {% if request.path == '/upload' %}
+                        <a class="nav-link active" href="/upload">
+                            {% else %}
+                            <a class="nav-link" href="/upload">
+                                {% endif %}
+                                <span data-feather="upload"></span>
+                                Upload
+                            </a>
+                    </li>
+                    <li class="nav-item">
                         {% if request.path == '/learning' %}
                         <a class="nav-link active" href="/learning">
                             {% else %}
