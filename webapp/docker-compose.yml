@@ -6,9 +6,9 @@ services:
             POSTGRES_PASSWORD: securepwd
             POSTGRES_USER: postgres
         volumes:
-            - ./sql/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
-            - ./sql/data.sql:/docker-entrypoint-initdb.d/2-data.sql
-            - ./sql/foreign_keys_and_updates.sql:/docker-entrypoint-initdb.d/3-foreign_keys_and_updates.sql
+            - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+#            - ./sql/data.sql:/docker-entrypoint-initdb.d/2-data.sql
+#            - ./sql/foreign_keys_and_updates.sql:/docker-entrypoint-initdb.d/3-foreign_keys_and_updates.sql
 
 
     adminer:
