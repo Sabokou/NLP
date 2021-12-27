@@ -21,7 +21,6 @@ CREATE TABLE IF NOT EXISTS QUESTIONS
     n_chapter_id    INT NOT NULL,
     s_question      VARCHAR(128)   NOT NULL,
     s_answer        VARCHAR(128)   NOT NULL,
-    b_solved        BOOLEAN NOT NULL,
     PRIMARY KEY (n_question_id),
     FOREIGN KEY (n_chapter_id) REFERENCES CONTENT (n_chapter_id) ON DELETE CASCADE
 );
@@ -67,7 +66,7 @@ INSERT INTO HIERARCHY(n_super_chapter_id, n_sub_chapter_id)
 VALUES (1, 2),
        (1,3);
 
-INSERT INTO QUESTION_RESULTS(n_chapter_id, b_solved)
+INSERT INTO QUESTION_RESULTS(n_question_id, b_solved)
 VALUES (1, FALSE),
        (2, FALSE),
        (3, FALSE),
@@ -80,3 +79,25 @@ INSERT INTO CHAPTER_RESULTS(n_chapter_id, b_qualificated, b_solved)
 VALUES (1, TRUE, FALSE),
        (2, FALSE, FALSE),
        (3, FALSE, FALSE);
+
+-- Create procedures
+create or replace procedure add_content(
+    s_lecture       VARCHAR(128),
+    s_chapter       VARCHAR(128),
+    s_content       VARCHAR(10000)
+)
+-- without addresses
+    language plpgsql
+AS
+$$
+DECLARE
+    chapter_id      INT;
+
+BEGIN
+    INSERT INTO CONTENT(s_lecture, s_chapter, s_content)
+    VALUES (s_lecture, s_chapter, s_content)
+    RETURNING n_chapter_id INTO chapter_id;
+
+END;
+$$
+;

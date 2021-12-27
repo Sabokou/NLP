@@ -11,8 +11,15 @@
          <input type = "file" name = "file" >
          <input type = "submit" value="Submit"/>
       </form>
+      <div>Allowed Filetypes: 'docx'</div>
+      <div>Insert Test Data into CONTENT-Table: </div>
+      <form action = "http://localhost:5000/connection" method = "POST"
+         enctype = "multipart/form-data" >
+         <input type = "submit" value="Submit"/>
+      </form>
    </body>
-    <div>Allowed Filetypes: 'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'docx'</div>
+
+
 </div>
 
 {% endblock %}

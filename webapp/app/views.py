@@ -2,6 +2,7 @@ from flask import render_template, request, flash, redirect, url_for
 from app import app
 from werkzeug.utils import secure_filename
 import os
+import psycopg2
 
 uploads_dir = os.path.join(app.root_path, 'Uploads')
 os.makedirs(uploads_dir, exist_ok=True)
@@ -12,7 +13,6 @@ ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'docx'}
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 
 
 # Page Functions
@@ -53,3 +53,13 @@ def uploading_file():
            return render_template("/includes/success.html", title='Success',
                                    text='Your file has been uploaded successfully.')
 
+@app.route('/connection', methods = ['GET', 'POST'])
+def test_connection():
+    dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
+    myCursor = dbconn.cursor()
+    myCursor.execute("CALL add_content('Test_lecture','Test_chapter', 'Test_content')")
+    dbconn.commit()
+    myCursor.close()
+    dbconn.close()
+    return render_template("/includes/success.html", title='Success',
+                           text="Your Data was successfully added to the database")
