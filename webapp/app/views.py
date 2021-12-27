@@ -34,6 +34,8 @@ def uploading_file():
         two_three_dict = Uploads.hierarchy(level_two_list, level_three_list)
         three_four_dict = Uploads.hierarchy(level_three_list, level_four_list)
         chapter_data_dict = Uploads.hierarchy(chapter_list, level_data_list)
+        for i in chapter_data_dict:
+            chapter_data_dict[i] = ' '.join(chapter_data_dict[i]).replace("'", "")
         Content_list = Uploads.prepare_DB_transmission(level_one_list, chapter_data_dict)
         Uploads.transmission_to_DB(Content_list)
         return render_template("/includes/success.html", title='Success',

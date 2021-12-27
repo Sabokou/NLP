@@ -117,7 +117,7 @@ class Uploads:
         dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
         myCursor = dbconn.cursor()
         for i in Content_List:
-            myCursor.execute(f"CALL add_content('{str(i[0])}', '{str(i[1])}', 'Test-Content')")
+            myCursor.execute(f"CALL add_content('{str(i[0])}', '{str(i[1])}', '{str(i[2])}')")
         dbconn.commit()
         myCursor.close()
         dbconn.close()
