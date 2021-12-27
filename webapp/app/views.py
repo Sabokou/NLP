@@ -2,17 +2,7 @@ from flask import render_template, request, flash, redirect, url_for
 from app import app
 from werkzeug.utils import secure_filename
 import os
-import psycopg2
-
-uploads_dir = os.path.join(app.root_path, 'Uploads')
-os.makedirs(uploads_dir, exist_ok=True)
-app.config['SECRET_KEY'] = 'mysecretkey'
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'docx'}
-
-# General Functions
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+from app.Uploads import Uploads
 
 
 # Page Functions
@@ -35,23 +25,19 @@ def upload():
 @app.route('/uploader', methods = ['GET', 'POST'])
 def uploading_file():
    if request.method == 'POST':
-       if 'file' not in request.files:
-           flash('No file part')
-           return render_template("/includes/fail.html", title='Error',
-                           text='No file part')
-       file = request.files['file']
-       # If the user does not select a file, the browser submits an
-       # empty file without a filename.
-       if file.filename == '':
-           flash('No selected file')
-           return render_template("/includes/fail.html", title='Error',
-                           text='No file was selected')
-       if file and allowed_file(file.filename):
-           filename = secure_filename(file.filename)
-           path=os.path.join(uploads_dir, filename)
-           file.save(path)
-           return render_template("/includes/success.html", title='Success',
-                                   text='Your file has been uploaded successfully.')
+        path = Uploads.initial_upload(request)
+        text = Uploads.convert_to_html(path)
+        MyList = Uploads.parse_html(text)
+        chapter_list = Uploads.chapter(MyList)
+        level_one_list, level_two_list, level_three_list, level_four_list, level_data_list = Uploads.level(MyList)
+        one_two_dict = Uploads.hierarchy(level_one_list, level_two_list)
+        two_three_dict = Uploads.hierarchy(level_two_list, level_three_list)
+        three_four_dict = Uploads.hierarchy(level_three_list, level_four_list)
+        chapter_data_dict = Uploads.hierarchy(chapter_list, level_data_list)
+        Content_list = Uploads.prepare_DB_transmission(level_one_list, chapter_data_dict)
+        Uploads.transmission_to_DB(Content_list)
+        return render_template("/includes/success.html", title='Success',
+                                   text="Your Data was successfully transmitted to the Database")
 
 @app.route('/connection', methods = ['GET', 'POST'])
 def test_connection():
