@@ -4,6 +4,8 @@ from werkzeug.utils import secure_filename
 import os
 from app.Uploads import Uploads
 from app.LearningForest import LearningForest
+import pandas as pd
+import psycopg2
 
 LF = LearningForest()
 
@@ -17,6 +19,16 @@ def index():
 def learning():
     lectures = LF.dropdown_lecture()
     return render_template("/learning.html", lectures=lectures)
+
+@app.route('/search', methods=['POST', 'GET'])
+def search():
+    select = request.form.get('lectures')
+    dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
+    result = pd.read_sql_query(f"""SELECT * FROM CONTENT WHERE s_lecture='{select}';""", dbconn)
+    return render_template("includes/table.html", column_names=result.columns.values,
+                               row_data=list(result.values.tolist()),
+                               title='Learning', sub_header='Overview over content in Database', link_column='none',
+                               zip=zip)
 
 @app.route('/exercise', methods=['POST', 'GET'])  # Exercise
 def exercise():

@@ -5,11 +5,16 @@
 {% block heading %}Learning{% endblock %}
 {% block body %}
 <div>
-    <select name= lectures method="GET" action="/">
-    {% for lecture in lectures %}
-    <option value= "{{lecture}}" SELECTED>{{lecture}}</option>"
-    {% endfor %}
-    </select>
+      <form action = "http://localhost:5000/search" method = "POST"
+         enctype = "multipart/form-data" >
+          <select name= lectures method="POST" action="http://localhost:5000/search">
+          {% for lecture in lectures %}
+          <option value= "{{lecture}}" SELECTED>{{lecture}}</option>"
+          {% endfor %}
+          </select>
+         <input type = "submit" value="Submit"/>
+      </form>
+
 </div>
 
 
