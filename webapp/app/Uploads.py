@@ -11,13 +11,13 @@ app.config['SECRET_KEY'] = 'mysecretkey'
 ALLOWED_EXTENSIONS = {'docx'}
 
 # General Functions
-def allowed_file(filename):
+def allowed_file(filename): #Tests if the file-type has an allowed extension
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 MyList = []
 
-class MyHTMLParser(HTMLParser):
+class MyHTMLParser(HTMLParser): # Specified Class of general HTML-Parser
     def handle_data(self, data):
         MyList.append([self.get_starttag_text(), data])
         return MyList
@@ -29,14 +29,12 @@ class Uploads:
         pass
 
     @staticmethod
-    def initial_upload(request):
+    def initial_upload(request): # Initially uploads the docx-file into an Upload-Folder within the WebApp
         if 'file' not in request.files:
             flash('No file part')
             return render_template("/includes/fail.html", title='Error',
                                    text='No file part')
         file = request.files['file']
-        # If the user does not select a file, the browser submits an
-        # empty file without a filename.
         if file.filename == '':
             flash('No selected file')
             return render_template("/includes/fail.html", title='Error',
@@ -48,23 +46,20 @@ class Uploads:
         return path
 
     @staticmethod
-    def convert_to_html(path):
+    def convert_to_html(path): # converts a docx-file to an HTML-file
         with open(path, "rb") as docx_file:
             result = mammoth.convert_to_html(docx_file, ignore_empty_paragraphs=False)
             text = result.value
-#            messages = result.messages
-#            with open('test.html', 'w') as html_file:
-#                html_file.write(text)
             return text
 
     @staticmethod
-    def parse_html(text):
+    def parse_html(text): # parses as an HTML-text in order to identify the different tags
         parser = MyHTMLParser()
         parser.feed(text)
         return MyList
 
     @staticmethod
-    def chapter(list):
+    def chapter(list): # creates a List of all chapters
         chapters = []
         for i in list:
             if i[0] != '<p>':
@@ -72,7 +67,7 @@ class Uploads:
         return chapters
 
     @staticmethod
-    def level(list):
+    def level(list): # identifies the different tags and levels of text
         level_one_list = []
         level_two_list = []
         level_three_list = []
@@ -92,7 +87,7 @@ class Uploads:
         return level_one_list, level_two_list, level_three_list, level_four_list, level_data_list
 
     @staticmethod
-    def hierarchy(list_one, list_two):
+    def hierarchy(list_one, list_two): # creates an hierarchy-dictionary with superchapters(key) and subchapters(values)
         added_values = []
         hierarchy_dict = {}
         for j in reversed(list_one):
@@ -105,7 +100,7 @@ class Uploads:
         return hierarchy_dict
 
     @staticmethod
-    def prepare_DB_transmission(level_one_list, chapter_data_dict):
+    def prepare_DB_transmission(level_one_list, chapter_data_dict): # prepares the chapter-content for the transmission the the database
         lecture = level_one_list[0][0]
         Content_List = []
         for i in chapter_data_dict:
@@ -113,7 +108,7 @@ class Uploads:
         return Content_List
 
     @staticmethod
-    def transmission_to_DB(Content_List):
+    def transmission_to_DB(Content_List): #fills the Chapter- and Chapter_Result-Tables in the database
         dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
         myCursor = dbconn.cursor()
         for i in reversed(Content_List):
@@ -123,6 +118,7 @@ class Uploads:
         dbconn.close()
 
     @staticmethod
+    # prepares the hierarchy-dictionaries for the transmission to the database
     def prepare_hierarchy_transmission(level_one_list, one_two_dict, two_three_dict, three_four_dict):
         lecture = level_one_list[0][0]
         Hierachy_List = []
@@ -141,7 +137,7 @@ class Uploads:
         return Hierachy_List
 
     @staticmethod
-    def hierarchy_transmission_to_DB(Hierarchy_List):
+    def hierarchy_transmission_to_DB(Hierarchy_List): # fills the hierarchy-table in the database
         dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
         myCursor = dbconn.cursor()
         for i in Hierarchy_List:
@@ -151,7 +147,7 @@ class Uploads:
         dbconn.close()
 
     @staticmethod
-    def lecture_transmission_to_DB(level_one_list, text):
+    def lecture_transmission_to_DB(level_one_list, text): # fills the lecture-table in the database
         dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
         myCursor = dbconn.cursor()
         lecture = level_one_list[0][0]
@@ -159,18 +155,5 @@ class Uploads:
         dbconn.commit()
         myCursor.close()
         dbconn.close()
-
-
-''' @staticmethod
-    def create_hierarchies(self, MyList):
-        chapter_list = self.chapter(MyList)
-        level_one_list, level_two_list, level_three_list, level_four_list, level_data_list = self.level(MyList)
-        one_two_dict = self.hierarchy(level_one_list, level_two_list)
-        two_three_dict = self.hierarchy(level_two_list, level_three_list)
-        three_four_dict = self.hierarchy(level_three_list, level_four_list)
-        chapter_data_dict = self.hierarchy(chapter_list, level_data_list)
-        return one_two_dict, two_three_dict, three_four_dict, chapter_data_dict
-'''
-
 
 

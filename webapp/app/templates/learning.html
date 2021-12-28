@@ -5,9 +5,9 @@
 {% block heading %}Learning{% endblock %}
 {% block body %}
 <div>
-      <form action = "http://localhost:5000/search" method = "POST"
+      <form action = "http://localhost:5000/text" method = "POST"
          enctype = "multipart/form-data" >
-          <select name= lectures method="POST" action="http://localhost:5000/search">
+          <select name= lectures method="POST" action="http://localhost:5000/text">
           {% for lecture in lectures %}
           <option value= "{{lecture}}" SELECTED>{{lecture}}</option>"
           {% endfor %}

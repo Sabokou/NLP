@@ -45,15 +45,15 @@ CREATE TABLE IF NOT EXISTS HIERARCHY
 CREATE TABLE IF NOT EXISTS QUESTION_RESULTS
 (
    n_question_id     INT NOT NULL,
-   b_solved         INT NOT NULL,
+   n_solved         INT NOT NULL, --0=FALSE, 1=TRUE
    FOREIGN KEY (n_question_id) REFERENCES QUESTIONS (n_question_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS CHAPTER_RESULTS
 (
    n_chapter_id     INT NOT NULL,
-   b_qualificated   INT NOT NULL,
-   b_solved         INT NOT NULL,
+   n_qualificated   INT NOT NULL, --0=FALSE, 1=TRUE
+   n_solved         INT NOT NULL, --0=FALSE, 1=TRUE
    FOREIGN KEY (n_chapter_id) REFERENCES CHAPTER (n_chapter_id) ON DELETE CASCADE
 );
 
@@ -78,7 +78,7 @@ INSERT INTO HIERARCHY(n_super_chapter_id, n_sub_chapter_id)
 VALUES (1, 2),
        (1,3);
 
-INSERT INTO QUESTION_RESULTS(n_question_id, b_solved)
+INSERT INTO QUESTION_RESULTS(n_question_id, n_solved)
 VALUES (1, 0),
        (2, 0),
        (3, 0),
@@ -87,14 +87,14 @@ VALUES (1, 0),
        (6, 0);
 
 
-INSERT INTO CHAPTER_RESULTS(n_chapter_id, b_qualificated, b_solved)
+INSERT INTO CHAPTER_RESULTS(n_chapter_id, n_qualificated, n_solved)
 VALUES (1, 1, 0),
        (2, 0, 0),
        (3, 0, 0);
 
 -- Create views
 CREATE VIEW Result_Overview AS
-SELECT C.s_lecture AS Lecture, ROUND(AVG(CR.b_solved),2) AS Completed
+SELECT C.s_lecture AS Lecture, ROUND(AVG(CR.n_solved),2) AS Completed
 FROM CHAPTER_RESULTS AS CR LEFT JOIN CHAPTER  AS C ON CR.n_chapter_id = C.n_chapter_id
 GROUP BY C.s_lecture;
 
@@ -119,10 +119,10 @@ BEGIN
 
     IF s_lecture = s_chapter
     THEN
-        INSERT INTO CHAPTER_RESULTS(n_chapter_id, b_qualificated, b_solved)
+        INSERT INTO CHAPTER_RESULTS(n_chapter_id, n_qualificated, n_solved)
         VALUES (chapter_id, 1, 0);
     ELSE
-       INSERT INTO CHAPTER_RESULTS(n_chapter_id, b_qualificated, b_solved)
+       INSERT INTO CHAPTER_RESULTS(n_chapter_id, n_qualificated, n_solved)
         VALUES (chapter_id, 0, 0);
 
     END IF;
