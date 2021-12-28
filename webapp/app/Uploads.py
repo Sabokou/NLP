@@ -122,6 +122,35 @@ class Uploads:
         myCursor.close()
         dbconn.close()
 
+    @staticmethod
+    def prepare_hierarchy_transmission(level_one_list, one_two_dict, two_three_dict, three_four_dict):
+        lecture = level_one_list[0][0]
+        Hierachy_List = []
+        for i in one_two_dict:
+            if one_two_dict[i] != []:
+                for j in one_two_dict[i]:
+                    Hierachy_List.append([lecture, i, j])
+        for i in two_three_dict:
+            if two_three_dict[i] != []:
+                for j in two_three_dict[i]:
+                    Hierachy_List.append([lecture, i, j])
+        for i in three_four_dict:
+            if three_four_dict[i] != []:
+                for j in three_four_dict[i]:
+                    Hierachy_List.append([lecture, i, j])
+        return Hierachy_List
+
+    @staticmethod
+    def hierarchy_transmission_to_DB(Hierarchy_List):
+        dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
+        myCursor = dbconn.cursor()
+        for i in Hierarchy_List:
+            myCursor.execute(f"CALL add_hierarchy('{str(i[0])}', '{str(i[1])}', '{str(i[2])}')")
+        dbconn.commit()
+        myCursor.close()
+        dbconn.close()
+
+
 ''' @staticmethod
     def create_hierarchies(self, MyList):
         chapter_list = self.chapter(MyList)

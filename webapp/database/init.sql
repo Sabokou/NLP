@@ -98,6 +98,39 @@ BEGIN
     VALUES (s_lecture, s_chapter, s_content)
     RETURNING n_chapter_id INTO chapter_id;
 
+    IF s_lecture = s_chapter
+    THEN
+        INSERT INTO CHAPTER_RESULTS(n_chapter_id, b_qualificated, b_solved)
+        VALUES (chapter_id, TRUE, FALSE);
+    ELSE
+       INSERT INTO CHAPTER_RESULTS(n_chapter_id, b_qualificated, b_solved)
+        VALUES (chapter_id, FALSE, FALSE);
+
+    END IF;
+
+END;
+$$
+;
+
+-- Create procedures
+create or replace procedure add_hierarchy(
+    s_lecture_txt       VARCHAR(128),
+    s_super_chapter     VARCHAR(128),
+    s_sub_chapter       VARCHAR(128)
+)
+-- without addresses
+    language plpgsql
+AS
+$$
+DECLARE
+    super_chapter_id      INT;
+    sub_chapter_id        INT;
+BEGIN
+    super_chapter_id := (SELECT n_chapter_id FROM CONTENT WHERE s_chapter = s_super_chapter AND s_lecture = s_lecture_txt);
+    sub_chapter_id := (SELECT n_chapter_id FROM CONTENT WHERE s_chapter = s_sub_chapter AND s_lecture = s_lecture_txt);
+
+    INSERT INTO HIERARCHY(n_super_chapter_id, n_sub_chapter_id)
+    VALUES (super_chapter_id, sub_chapter_id);
 END;
 $$
 ;

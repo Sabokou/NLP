@@ -38,8 +38,10 @@ def uploading_file():
             chapter_data_dict[i] = ' '.join(chapter_data_dict[i]).replace("'", "")
         Content_list = Uploads.prepare_DB_transmission(level_one_list, chapter_data_dict)
         Uploads.transmission_to_DB(Content_list)
+        Hierarchy_list = Uploads.prepare_hierarchy_transmission(level_one_list, one_two_dict, two_three_dict, three_four_dict)
+        Uploads.hierarchy_transmission_to_DB(Hierarchy_list)
         return render_template("/includes/success.html", title='Success',
-                                   text="Your Data was successfully transmitted to the Database")
+                                   text=Hierarchy_list)
 
 @app.route('/connection', methods = ['GET', 'POST'])
 def test_connection():
