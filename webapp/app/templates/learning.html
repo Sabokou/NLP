@@ -5,7 +5,11 @@
 {% block heading %}Learning{% endblock %}
 {% block body %}
 <div>
-    <h1>Learning</h1>
+    <select name= lectures method="GET" action="/">
+    {% for lecture in lectures %}
+    <option value= "{{lecture}}" SELECTED>{{lecture}}</option>"
+    {% endfor %}
+    </select>
 </div>
 
 

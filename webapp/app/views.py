@@ -3,6 +3,9 @@ from app import app
 from werkzeug.utils import secure_filename
 import os
 from app.Uploads import Uploads
+from app.LearningForest import LearningForest
+
+LF = LearningForest()
 
 
 # Page Functions
@@ -12,11 +15,13 @@ def index():
 
 @app.route('/learning', methods=['POST', 'GET'])  # Learning
 def learning():
-    return render_template("/learning.html")
+    lectures = LF.dropdown_lecture()
+    return render_template("/learning.html", lectures=lectures)
 
 @app.route('/exercise', methods=['POST', 'GET'])  # Exercise
 def exercise():
-    return render_template("/exercise.html")
+    lectures = LF.dropdown_lecture()
+    return render_template("/exercise.html", lectures=lectures)
 
 @app.route('/upload', methods=['POST', 'GET'])  # Upload
 def upload():
