@@ -1,4 +1,5 @@
 -- Drop all old
+-- DROP TABLE IF EXISTS LECTURE
 -- DROP TABLE IF EXISTS CHAPTER;
 -- DROP TABLE IF EXISTS QUESTIONS;
 -- DROP TABLE IF EXISTS HIERARCHY;
@@ -44,15 +45,15 @@ CREATE TABLE IF NOT EXISTS HIERARCHY
 CREATE TABLE IF NOT EXISTS QUESTION_RESULTS
 (
    n_question_id     INT NOT NULL,
-   b_solved         BOOLEAN NOT NULL,
+   b_solved         INT NOT NULL,
    FOREIGN KEY (n_question_id) REFERENCES QUESTIONS (n_question_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS CHAPTER_RESULTS
 (
    n_chapter_id     INT NOT NULL,
-   b_qualificated   BOOLEAN NOT NULL,
-   b_solved         BOOLEAN NOT NULL,
+   b_qualificated   INT NOT NULL,
+   b_solved         INT NOT NULL,
    FOREIGN KEY (n_chapter_id) REFERENCES CHAPTER (n_chapter_id) ON DELETE CASCADE
 );
 
@@ -78,18 +79,25 @@ VALUES (1, 2),
        (1,3);
 
 INSERT INTO QUESTION_RESULTS(n_question_id, b_solved)
-VALUES (1, FALSE),
-       (2, FALSE),
-       (3, FALSE),
-       (4, FALSE),
-       (5, FALSE),
-       (6, FALSE);
+VALUES (1, 0),
+       (2, 0),
+       (3, 0),
+       (4, 0),
+       (5, 0),
+       (6, 0);
 
 
 INSERT INTO CHAPTER_RESULTS(n_chapter_id, b_qualificated, b_solved)
-VALUES (1, TRUE, FALSE),
-       (2, FALSE, FALSE),
-       (3, FALSE, FALSE);
+VALUES (1, 1, 0),
+       (2, 0, 0),
+       (3, 0, 0);
+
+-- Create views
+CREATE VIEW Result_Overview AS
+SELECT C.s_lecture AS Lecture, ROUND(AVG(CR.b_solved),2) AS Completed
+FROM CHAPTER_RESULTS AS CR LEFT JOIN CHAPTER  AS C ON CR.n_chapter_id = C.n_chapter_id
+GROUP BY C.s_lecture;
+
 
 -- Create procedures
 create or replace procedure add_content(
@@ -112,10 +120,10 @@ BEGIN
     IF s_lecture = s_chapter
     THEN
         INSERT INTO CHAPTER_RESULTS(n_chapter_id, b_qualificated, b_solved)
-        VALUES (chapter_id, TRUE, FALSE);
+        VALUES (chapter_id, 1, 0);
     ELSE
        INSERT INTO CHAPTER_RESULTS(n_chapter_id, b_qualificated, b_solved)
-        VALUES (chapter_id, FALSE, FALSE);
+        VALUES (chapter_id, 0, 0);
 
     END IF;
 
@@ -123,13 +131,13 @@ END;
 $$
 ;
 
--- Create procedures
+
 create or replace procedure add_hierarchy(
     s_lecture_txt       VARCHAR(128),
     s_super_chapter     VARCHAR(128),
     s_sub_chapter       VARCHAR(128)
 )
--- without addresses
+
     language plpgsql
 AS
 $$
@@ -146,12 +154,12 @@ END;
 $$
 ;
 
--- Create procedures
+
 create or replace procedure add_lecture(
     s_lecture_txt       VARCHAR(128),
     s_lecture_content   VARCHAR(100000)
 )
--- without addresses
+
     language plpgsql
 AS
 $$

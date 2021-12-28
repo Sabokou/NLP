@@ -31,15 +31,3 @@ class LearningForest:
         myCursor.close()
         dbconn.close()
         return result
-
-    @staticmethod
-    def get_select(sql_statement):
-        try:
-            self.alchemy_engine = sqlalchemy.create_engine(
-                'postgres+psycopg2://postgres:securepwd@db:5432/postgres')
-            df = pd.read_sql_query(s_sql_statement, self.alchemy_connection)
-        except Exception as an_exception:
-            logging.error(an_exception)
-            logging.error("Query couldn't be executed.")
-            return False
-        return df

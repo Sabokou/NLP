@@ -13,7 +13,13 @@ LF = LearningForest()
 # Page Functions
 @app.route('/')  # Overview
 def index():
-    return render_template("/index.html")
+    dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
+    result = pd.read_sql_query(f"""SELECT * FROM Result_Overview;""", dbconn)
+    return render_template("includes/table.html", column_names=result.columns.values,
+                                   row_data=list(result.values.tolist()),
+                                   title='Overview', sub_header="Your Results:", link_column='none',
+                                   zip=zip)
+
 
 @app.route('/learning', methods=['POST', 'GET'])  # Learning
 def learning():
@@ -21,15 +27,6 @@ def learning():
     return render_template("/learning.html", lectures=lectures)
 
 @app.route('/search', methods=['POST', 'GET'])
-#def search():
-#    select = request.form.get('lectures')
-#    dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
-#    result = pd.read_sql_query(f"""SELECT * FROM CHAPTER WHERE s_lecture='{select}';""", dbconn)
-#    return render_template("includes/table.html", column_names=result.columns.values,
-#                               row_data=list(result.values.tolist()),
-#                               title='Learning', sub_header=select, link_column='none',
-#                               zip=zip)
-
 def text():
     select = request.form.get('lectures')
     dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
