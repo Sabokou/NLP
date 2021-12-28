@@ -1,0 +1,9 @@
+torch
+transformers
+datasets
+numpy
+spacy
+tokenizers
+sentencepiece
+scikit-learn
+jupyter
