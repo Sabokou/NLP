@@ -116,7 +116,7 @@ class Uploads:
     def transmission_to_DB(Content_List):
         dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
         myCursor = dbconn.cursor()
-        for i in Content_List:
+        for i in reversed(Content_List):
             myCursor.execute(f"CALL add_content('{str(i[0])}', '{str(i[1])}', '{str(i[2])}')")
         dbconn.commit()
         myCursor.close()
@@ -146,6 +146,16 @@ class Uploads:
         myCursor = dbconn.cursor()
         for i in Hierarchy_List:
             myCursor.execute(f"CALL add_hierarchy('{str(i[0])}', '{str(i[1])}', '{str(i[2])}')")
+        dbconn.commit()
+        myCursor.close()
+        dbconn.close()
+
+    @staticmethod
+    def lecture_transmission_to_DB(level_one_list, text):
+        dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
+        myCursor = dbconn.cursor()
+        lecture = level_one_list[0][0]
+        myCursor.execute(f"CALL add_lecture('{lecture}', '{text}')")
         dbconn.commit()
         myCursor.close()
         dbconn.close()

@@ -1,12 +1,20 @@
 -- Drop all old
--- DROP TABLE IF EXISTS CONTENT;
+-- DROP TABLE IF EXISTS CHAPTER;
 -- DROP TABLE IF EXISTS QUESTIONS;
 -- DROP TABLE IF EXISTS HIERARCHY;
 -- DROP TABLE IF EXISTS QUESTION_RESULTS;
 -- DROP TABLE IF EXISTS CHAPTER_RESULTS;
 
 -- Create tables
-CREATE TABLE IF NOT EXISTS CONTENT
+CREATE TABLE IF NOT EXISTS LECTURE
+(
+    n_lecture_id   SERIAL UNIQUE NOT NULL,
+    s_lecture       VARCHAR(128)  NOT NULL,
+    s_content       VARCHAR(100000)   NOT NULL,
+    PRIMARY KEY (n_lecture_id)
+);
+
+CREATE TABLE IF NOT EXISTS CHAPTER
 (
     n_chapter_id   SERIAL UNIQUE NOT NULL,
     s_lecture       VARCHAR(128)  NOT NULL,
@@ -22,15 +30,15 @@ CREATE TABLE IF NOT EXISTS QUESTIONS
     s_question      VARCHAR(128)   NOT NULL,
     s_answer        VARCHAR(128)   NOT NULL,
     PRIMARY KEY (n_question_id),
-    FOREIGN KEY (n_chapter_id) REFERENCES CONTENT (n_chapter_id) ON DELETE CASCADE
+    FOREIGN KEY (n_chapter_id) REFERENCES CHAPTER (n_chapter_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS HIERARCHY
 (
   n_super_chapter_id    INT NOT NULL,
   n_sub_chapter_id      INT NOT NULL,
-  FOREIGN KEY (n_super_chapter_id) REFERENCES CONTENT (n_chapter_id) ON DELETE CASCADE,
-  FOREIGN KEY (n_sub_chapter_id) REFERENCES CONTENT (n_chapter_id) ON DELETE CASCADE
+  FOREIGN KEY (n_super_chapter_id) REFERENCES CHAPTER (n_chapter_id) ON DELETE CASCADE,
+  FOREIGN KEY (n_sub_chapter_id) REFERENCES CHAPTER (n_chapter_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS QUESTION_RESULTS
@@ -45,11 +53,14 @@ CREATE TABLE IF NOT EXISTS CHAPTER_RESULTS
    n_chapter_id     INT NOT NULL,
    b_qualificated   BOOLEAN NOT NULL,
    b_solved         BOOLEAN NOT NULL,
-   FOREIGN KEY (n_chapter_id) REFERENCES CONTENT (n_chapter_id) ON DELETE CASCADE
+   FOREIGN KEY (n_chapter_id) REFERENCES CHAPTER (n_chapter_id) ON DELETE CASCADE
 );
 
 -- Fill tables
-INSERT INTO CONTENT(s_lecture, s_chapter, s_content)
+INSERT INTO LECTURE(s_lecture, s_content)
+VALUES ('Databases I', '<p>Content of Database I</p>');
+
+INSERT INTO CHAPTER(s_lecture, s_chapter, s_content)
 VALUES ('Databases I', '1.', 'Content of Chapter 1.'),
        ('Databases I', '1.1.', 'Content of Chapter 1.1.'),
        ('Databases I', '1.2.', 'Content of Chapter 1.2.');
@@ -94,7 +105,7 @@ DECLARE
     chapter_id      INT;
 
 BEGIN
-    INSERT INTO CONTENT(s_lecture, s_chapter, s_content)
+    INSERT INTO CHAPTER(s_lecture, s_chapter, s_content)
     VALUES (s_lecture, s_chapter, s_content)
     RETURNING n_chapter_id INTO chapter_id;
 
@@ -126,12 +137,34 @@ DECLARE
     super_chapter_id      INT;
     sub_chapter_id        INT;
 BEGIN
-    super_chapter_id := (SELECT n_chapter_id FROM CONTENT WHERE s_chapter = s_super_chapter AND s_lecture = s_lecture_txt);
-    sub_chapter_id := (SELECT n_chapter_id FROM CONTENT WHERE s_chapter = s_sub_chapter AND s_lecture = s_lecture_txt);
+    super_chapter_id := (SELECT n_chapter_id FROM CHAPTER WHERE s_chapter = s_super_chapter AND s_lecture = s_lecture_txt);
+    sub_chapter_id := (SELECT n_chapter_id FROM CHAPTER WHERE s_chapter = s_sub_chapter AND s_lecture = s_lecture_txt);
 
     INSERT INTO HIERARCHY(n_super_chapter_id, n_sub_chapter_id)
     VALUES (super_chapter_id, sub_chapter_id);
 END;
 $$
 ;
+
+-- Create procedures
+create or replace procedure add_lecture(
+    s_lecture_txt       VARCHAR(128),
+    s_lecture_content   VARCHAR(100000)
+)
+-- without addresses
+    language plpgsql
+AS
+$$
+DECLARE
+    lecture_id      INT;
+
+BEGIN
+
+    INSERT INTO LECTURE(s_lecture, s_content)
+    VALUES (s_lecture_txt, s_lecture_content)
+    RETURNING n_lecture_id INTO lecture_id;
+END
+$$
+;
+
 

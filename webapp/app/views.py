@@ -21,14 +21,23 @@ def learning():
     return render_template("/learning.html", lectures=lectures)
 
 @app.route('/search', methods=['POST', 'GET'])
-def search():
+#def search():
+#    select = request.form.get('lectures')
+#    dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
+#    result = pd.read_sql_query(f"""SELECT * FROM CHAPTER WHERE s_lecture='{select}';""", dbconn)
+#    return render_template("includes/table.html", column_names=result.columns.values,
+#                               row_data=list(result.values.tolist()),
+#                               title='Learning', sub_header=select, link_column='none',
+#                               zip=zip)
+
+def text():
     select = request.form.get('lectures')
     dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
-    result = pd.read_sql_query(f"""SELECT * FROM CONTENT WHERE s_lecture='{select}';""", dbconn)
-    return render_template("includes/table.html", column_names=result.columns.values,
-                               row_data=list(result.values.tolist()),
-                               title='Learning', sub_header='Overview over content in Database', link_column='none',
-                               zip=zip)
+    result = pd.read_sql_query(f"""SELECT s_content FROM LECTURE WHERE s_lecture='{select}';""", dbconn)
+    row_data = list(result.values.tolist())
+    return render_template("includes/text.html", title='Learning', sub_header=select, Text=row_data[0][0])
+
+
 
 @app.route('/exercise', methods=['POST', 'GET'])  # Exercise
 def exercise():
@@ -57,5 +66,6 @@ def uploading_file():
         Uploads.transmission_to_DB(Content_list)
         Hierarchy_list = Uploads.prepare_hierarchy_transmission(level_one_list, one_two_dict, two_three_dict, three_four_dict)
         Uploads.hierarchy_transmission_to_DB(Hierarchy_list)
+        Uploads.lecture_transmission_to_DB(level_one_list, text.replace("'", ""))
         return render_template("/includes/success.html", title='Success',
                                    text="Your Data was successfully transmitted to the Database")
