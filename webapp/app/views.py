@@ -41,15 +41,4 @@ def uploading_file():
         Hierarchy_list = Uploads.prepare_hierarchy_transmission(level_one_list, one_two_dict, two_three_dict, three_four_dict)
         Uploads.hierarchy_transmission_to_DB(Hierarchy_list)
         return render_template("/includes/success.html", title='Success',
-                                   text=Hierarchy_list)
-
-@app.route('/connection', methods = ['GET', 'POST'])
-def test_connection():
-    dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
-    myCursor = dbconn.cursor()
-    myCursor.execute("CALL add_content('Test_lecture','Test_chapter', 'Test_content')")
-    dbconn.commit()
-    myCursor.close()
-    dbconn.close()
-    return render_template("/includes/success.html", title='Success',
-                           text="Your Data was successfully added to the database")
+                                   text="Your Data was successfully transmitted to the Database")
