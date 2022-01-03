@@ -6,3 +6,4 @@ psycopg2-binary
 mammoth~=1.4.18
 Werkzeug~=2.0.2
 pandas
+sklearn
