@@ -1,6 +1,7 @@
 import psycopg2
 import pandas as pd
 from app.Uploads import Uploads
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 class LearningForest:
@@ -61,3 +62,17 @@ class LearningForest:
         row_data = list(result.values.tolist())
         text = row_data[0][0]
         return select, text
+
+    @staticmethod
+    def check_if_correct(correct_answer, my_answer): # calculates the similarity between the inserted answer and the correct answer by using TFIDF
+        corpus = [my_answer, correct_answer]
+        vect = TfidfVectorizer(min_df=1, stop_words="english")
+        tfidf = vect.fit_transform(corpus)
+        pairwise_similarity = tfidf * tfidf.T
+        pairwise_similarity_arr = pairwise_similarity.toarray()
+        score = pairwise_similarity_arr[0][1]
+        print(score)
+        if score > 0.5: # if similarity is greater than 0,5 --> answer is classified as correct
+            return True
+        else:           # if similarity is less than 0,5 --> answer is classified as false
+            return False
