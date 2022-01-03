@@ -2,7 +2,7 @@ import json
 import pandas as pd
 
 # Open training dataset (downloaded from: https://rajpurkar.github.io/SQuAD-explorer/)
-with open("train-v2.0.json", "r") as f:
+with open("dev-v2.0_full.json", "r") as f:
     # Load data from json
     output = json.load(f)
     # Discarding version from 1st level json hierarchy
@@ -10,7 +10,7 @@ with open("train-v2.0.json", "r") as f:
 
 # create list with all question and answer pairs from json
 liste_to_df = list()
-for i in output[:]:
+for i in output[:int(len(output)*0.1)]:
     title = i.get("title")
     paragrahs = i.get("paragraphs")
     # print("I-Keys:", i.keys())
@@ -36,5 +36,5 @@ df = pd.DataFrame(liste_to_df, columns=["frage", "kontext"])
 training_df = df.sample(frac=0.75)
 validation_df = df.drop(training_df.index)
 # Save datasets to CSVs
-training_df.to_csv("training.csv", sep=";", index=False)
-validation_df.to_csv("validation.csv", sep=";", index=False)
+training_df.to_csv("training_dev.csv", sep=",", index=False)
+validation_df.to_csv("validation_dev.csv", sep=",", index=False)

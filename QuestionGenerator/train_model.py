@@ -1,4 +1,5 @@
 # Torch imports
+import datasets
 import torch
 from torch.optim import AdamW
 from torch.utils.data import DataLoader, Dataset
@@ -14,18 +15,49 @@ from transformers import T5Config, T5ForConditionalGeneration, T5Tokenizer
 # Used for progress
 from tqdm import tqdm
 
+# Importing dataset class
+from qg_dataset import CustomQGDataset
+
+# TODO
+from accuracy_score import AccuracyScore
+
+
+def get_tokenizer(checkpoint: str) -> T5Tokenizer:
+    """
+    Fetches the Tokenizer from the transformer library.
+    Parameters
+    ----------
+    checkpoint:str
+        use Checkpoint to fetch Tokenizer
+    Returns
+    -------
+    T5Tokenizer
+        Used Tokenizer for the model.
+    """
+    fetched_tokenizer = T5Tokenizer.from_pretrained(checkpoint)
+    fetched_tokenizer.add_special_tokens(
+        {'additional_special_tokens': ['<ANWSR>', '<CNTXT>']}
+    )
+    return fetched_tokenizer
+
+
 # Put functions into class to make it easily accessible from different python files
 class ModelTrainer:
     def __init__(
             self,
+            training_dataset: Dataset,
+            validation_dataset: Dataset,
+            checkpoint: str,
             model=None,
-            tokenizer=None,
-            checkpoint:str=None) -> None:
+            tokenizer=None) -> None:
+
+        # setup starting checkpoint
+        self.checkpoint = checkpoint
 
         # Set device to use CUDA if available during use
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         # setup tokenizer
-        self.tokenizer = self._get_tokenizer() if tokenizer is None else tokenizer
+        self.tokenizer = get_tokenizer() if tokenizer is None else tokenizer
         # setup
         self.model = self._get_starting_model() if model is None else model
 
@@ -47,7 +79,7 @@ class ModelTrainer:
             shuffle=True
         )
         self.testing_data_loader = DataLoader(
-            test_dataset,
+            validation_dataset,
             batch_size=self.train_batch_size,
             num_workers=2,
             shuffle=False
@@ -58,7 +90,7 @@ class ModelTrainer:
         self.optimizer = AdamW(self.model.parameters(), lr=1e-3)
 
         # setup loss measurement for training
-        self.train_loss = AverageMeter()
+        self.train_loss = AccuracyScore()
 
         # setup accuracy storage for validation
         self.best_accuracy = 0
@@ -118,7 +150,7 @@ class ModelTrainer:
         """
         # calls eval function from the model
         self.model.eval()
-        accuracy = AverageMeter()
+        accuracy = AccuracyScore()
 
         # create new status bar for the validation progress
         with tqdm(total=len(dataloader), unit="batches") as epoch:
@@ -155,26 +187,19 @@ class ModelTrainer:
         T5ForConditionalGeneration
         """
         config = T5Config(decoder_start_token_id=self.tokenizer.pad_token_id)
-        model = T5ForConditionalGeneration(config).from_pretrained(checkpoint)
+        model = T5ForConditionalGeneration(config).from_pretrained(self.checkpoint)
         model.resize_token_embeddings(len(self.tokenizer))
         model = model.to(self.device)
         return model
 
-    def _get_tokenizer(self, checkpoint:str) -> T5Tokenizer:
-        """
-        Fetches the Tokenizer from the transformer library.
-        Parameters
-        ----------
-        checkpoint : str
-            Checkpoint to load.
 
-        Returns
-        -------
-        T5Tokenizer
-            Used Tokenizer for the model.
-        """
-        tokenizer = T5Tokenizer.from_pretrained(checkpoint)
-        tokenizer.add_special_tokens(
-            {'additional_sepcial_tokens': ['<Antwort>', '<Kontext>']}
-        )
-        return tokenizer
+if __name__ == "__main__":
+    tokenizer = get_tokenizer("t5-base")
+
+    dataset = datasets.load_dataset("Sabokou/qg_squad_modified")
+
+    train_set = CustomQGDataset(dataset["train"], max_length=512, pad_mask_id=-100, tokenizer=tokenizer)
+    valid_set = CustomQGDataset(dataset["validation"], max_length=512, pad_mask_id=-100, tokenizer=tokenizer)
+
+    trainer_class = ModelTrainer(training_dataset=train_set, validation_dataset=valid_set, checkpoint="t5-base")
+    trainer_class.train()
