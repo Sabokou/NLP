@@ -1,55 +1,48 @@
 from flask import render_template, request, flash, redirect, url_for
 from app import app
-from werkzeug.utils import secure_filename
-import os
+from app.LearningForest import LearningForest
+import pandas as pd
+import psycopg2
 
-uploads_dir = os.path.join(app.root_path, 'Uploads')
-os.makedirs(uploads_dir, exist_ok=True)
-app.config['SECRET_KEY'] = 'mysecretkey'
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'docx'}
-
-# General Functions
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
+LF = LearningForest()
 
 
 # Page Functions
-@app.route('/')  # Overview
+@app.route('/')  # Overview - Page
 def index():
-    return render_template("/index.html")
+    dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
+    result = pd.read_sql_query(f"""SELECT * FROM Result_Overview;""", dbconn)
+    return render_template("includes/table.html", column_names=result.columns.values,
+                                   row_data=list(result.values.tolist()),
+                                   title='Overview', sub_header="Your Results:", link_column='none',
+                                   zip=zip)
 
-@app.route('/learning', methods=['POST', 'GET'])  # Learning
-def learning():
-    return render_template("/learning.html")
-
-@app.route('/exercise', methods=['POST', 'GET'])  # Exercise
-def exercise():
-    return render_template("/exercise.html")
-
-@app.route('/upload', methods=['POST', 'GET'])  # Upload
+@app.route('/upload', methods=['POST', 'GET'])  # Upload - Page
 def upload():
     return render_template("/upload.html")
 
-@app.route('/uploader', methods = ['GET', 'POST'])
+@app.route('/uploader', methods = ['GET', 'POST']) # Success-Page after an Document has been upload
 def uploading_file():
    if request.method == 'POST':
-       if 'file' not in request.files:
-           flash('No file part')
-           return render_template("/includes/fail.html", title='Error',
-                           text='No file part')
-       file = request.files['file']
-       # If the user does not select a file, the browser submits an
-       # empty file without a filename.
-       if file.filename == '':
-           flash('No selected file')
-           return render_template("/includes/fail.html", title='Error',
-                           text='No file was selected')
-       if file and allowed_file(file.filename):
-           filename = secure_filename(file.filename)
-           path=os.path.join(uploads_dir, filename)
-           file.save(path)
-           return render_template("/includes/success.html", title='Success',
-                                   text='Your file has been uploaded successfully.')
+        LF.upload_process(request)
+        return render_template("/includes/success.html", title='Success',
+                                   text="Your Data was successfully transmitted to the Database")
+
+
+@app.route('/learning', methods=['POST', 'GET'])  # Learning - Page
+def learning():
+    lectures = LF.dropdown_lecture()
+    return render_template("/learning.html", lectures=lectures)
+
+@app.route('/text', methods=['POST', 'GET']) # Detailed Text from Learning-Page
+def text():
+    select, text = LF.text_generation(request)
+    return render_template("includes/text.html", title='Learning', sub_header=select, Text=text)
+
+
+
+@app.route('/exercise', methods=['POST', 'GET'])  # Exercise-Page
+def exercise():
+    lectures = LF.dropdown_lecture()
+    return render_template("/exercise.html", lectures=lectures)
 

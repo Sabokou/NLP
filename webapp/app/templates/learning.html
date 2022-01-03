@@ -5,7 +5,16 @@
 {% block heading %}Learning{% endblock %}
 {% block body %}
 <div>
-    <h1>Learning</h1>
+      <form action = "http://localhost:5000/text" method = "POST"
+         enctype = "multipart/form-data" >
+          <select name= lectures method="POST" action="http://localhost:5000/text">
+          {% for lecture in lectures %}
+          <option value= "{{lecture}}" SELECTED>{{lecture}}</option>"
+          {% endfor %}
+          </select>
+         <input type = "submit" value="Submit"/>
+      </form>
+
 </div>
 
 
