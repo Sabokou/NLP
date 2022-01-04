@@ -4,15 +4,19 @@
 {% block title %}Upload{% endblock %}
 {% block heading %}Upload{% endblock %}
 {% block body %}
+
 <div>
    <body>
       <form action = "http://localhost:5000/uploader" method = "POST"
          enctype = "multipart/form-data" >
-         <input type = "file" name = "file" >
-         <input type = "submit" value="Submit"/>
+         <div class="d-flex">
+            <input type = "file" name = "file" class="form-control me-3">
+            <input type = "submit" value="Submit" class="btn btn-primary"/>
+         </div>
       </form>
-      <div>Allowed Filetypes: 'docx'</div>
    </body>
-</div>
+   <div class="form-text m-1">
+      Allowed Filetypes: 'docx'
+  </div>
 
 {% endblock %}
