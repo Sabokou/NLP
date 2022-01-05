@@ -2,7 +2,9 @@ import psycopg2
 import pandas as pd
 from app.Uploads import Uploads
 from sklearn.feature_extraction.text import TfidfVectorizer
+#from app.QuestionGenerator.qg import QuestionGenerator
 
+#qg=QuestionGenerator()
 
 class LearningForest:
 
