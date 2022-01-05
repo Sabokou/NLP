@@ -26,8 +26,11 @@ services:
         restart: always
         
     app:
-        build: .
-        ports: 
+
+        build:
+            context: ../
+            dockerfile: ./webapp/Dockerfile
+        ports:
             - 5000:5000
 #        volumes:
 #            - ./app:/usr/src/app

@@ -5,10 +5,11 @@ FROM python:3.10-slim
 WORKDIR /src
 
 # copy folder into working directory
-COPY . /src
+COPY ./webapp /src
+COPY ./QuestionGenerator/qg.py /src
 
 # install requirements
-COPY requirements.txt requirements.txt
+COPY /webapp/requirements.txt requirements.txt
 RUN pip install -r requirements.txt
 
 EXPOSE 5000
