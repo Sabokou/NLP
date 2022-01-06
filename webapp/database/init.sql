@@ -175,4 +175,28 @@ END
 $$
 ;
 
+create or replace procedure add_question(
+    s_lecture_txt       VARCHAR(128),
+    s_chapter_txt       VARCHAR(128),
+    s_question_txt      VARCHAR(10000),
+    s_answer_txt        VARCHAR(10000)
+)
+
+    language plpgsql
+AS
+$$
+DECLARE
+    question_id      INT;
+    chapter_id       INT;
+
+BEGIN
+
+    chapter_id := (SELECT n_chapter_id FROM CHAPTER WHERE s_chapter = s_chapter_txt AND s_lecture = s_lecture_txt);
+
+    INSERT INTO QUESTIONS(n_chapter_id, s_question, s_answer)
+    VALUES (chapter_id, s_question_txt, s_answer_txt)
+    RETURNING n_question_id INTO question_id;
+END
+$$
+;
 

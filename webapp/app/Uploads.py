@@ -4,6 +4,9 @@ import os
 from app import app
 from html.parser import HTMLParser
 import psycopg2
+from app.qg import QuestionGenerator
+
+qg = QuestionGenerator()
 
 uploads_dir = os.path.join(app.root_path, 'Uploaded_Docs')
 os.makedirs(uploads_dir, exist_ok=True)
@@ -136,6 +139,7 @@ class Uploads:
                     Hierachy_List.append([lecture, i, j])
         return Hierachy_List
 
+
     @staticmethod
     def hierarchy_transmission_to_DB(Hierarchy_List): # fills the hierarchy-table in the database
         dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
@@ -152,6 +156,27 @@ class Uploads:
         myCursor = dbconn.cursor()
         lecture = level_one_list[0][0]
         myCursor.execute(f"CALL add_lecture('{lecture}', '{text}')")
+        dbconn.commit()
+        myCursor.close()
+        dbconn.close()
+
+    @staticmethod
+    def prepare_question_transmission(text):
+        #text = "Computational linguistics is an interdisciplinary field concerned with the computational modelling of natural language, as well as the study of appropriate computational approaches to linguistic questions. In general, computational linguistics draws upon linguistics, computer science, artificial intelligence, mathematics, logic, philosophy, cognitive science, cognitive psychology, psycholinguistics, anthropology and neuroscience, among others."
+        question_answer_dict = qg.generate(str(text))
+        question_answer_list = []
+        for i in range(len(question_answer_dict)):
+            inner_list = []
+            for j in question_answer_dict[i].keys():
+                inner_list.append(question_answer_dict[i][j])
+            question_answer_list.append(inner_list)
+        return question_answer_dict, question_answer_list
+
+    @staticmethod
+    def question_transmission_to_DB(lecture, chapter, question, answer):
+        dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
+        myCursor = dbconn.cursor()
+        myCursor.execute(f"CALL add_question('{lecture}','{chapter}','{question}', '{answer}')")
         dbconn.commit()
         myCursor.close()
         dbconn.close()
