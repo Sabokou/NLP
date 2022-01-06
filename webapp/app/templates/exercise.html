@@ -5,9 +5,9 @@
 {% block heading %}Exercise{% endblock %}
 {% block body %}
 
-<form action = "{{ url_for('exercise')}}" method="POST" enctype = "multipart/form-data">
+<form action = "http://localhost:5000/exercising" method="POST" enctype = "multipart/form-data">
     <div class="d-flex">
-        <select class="form-select me-3" name= lectures method="POST" action="{{ url_for('exercise')}}">
+        <select class="form-select me-3" name= lectures method="POST" action="http://localhost:5000/exercising">
         {% for lecture in lectures %}
         <option value= "{{lecture}}" name="lecture_name" SELECTED>{{lecture}}</option>"
         {% endfor %}

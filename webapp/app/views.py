@@ -44,6 +44,10 @@ def text():
 @app.route('/exercise', methods=['POST', 'GET'])  # Exercise-Page
 def exercise():
     lectures = LF.dropdown_lecture()
+    return render_template("/exercise.html", lectures=lectures)
+
+@app.route('/exercising', methods=['POST', 'GET'])
+def exercising():
     if request.method == 'POST':
         if request.form['btn_start'] == 'start':
             question = LF.get_question_answer(request)
@@ -54,4 +58,8 @@ def exercise():
                                     chapter = chapter,
                                     lecture = lecture)
 
-    return render_template("/exercise.html", lectures=lectures)
+
+@app.route('/checking', methods=['POST', 'GET'])
+def checking():
+    return render_template("/checking.html")
+
