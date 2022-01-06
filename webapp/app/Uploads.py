@@ -156,28 +156,39 @@ class Uploads:
         dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
         myCursor = dbconn.cursor()
         lecture = level_one_list[0][0]
-        myCursor.execute(f"CALL add_lecture('{lecture}', '{text}')")
+        myCursor.execute(f"""CALL add_lecture('{lecture}', '{text.replace("'", "")}')""")
         dbconn.commit()
         myCursor.close()
         dbconn.close()
 
     @staticmethod
-    def prepare_question_transmission(text):
-        #text = "Computational linguistics is an interdisciplinary field concerned with the computational modelling of natural language, as well as the study of appropriate computational approaches to linguistic questions. In general, computational linguistics draws upon linguistics, computer science, artificial intelligence, mathematics, logic, philosophy, cognitive science, cognitive psychology, psycholinguistics, anthropology and neuroscience, among others."
-        question_answer_dict = qg.generate(str(text))
-        question_answer_list = []
-        for i in range(len(question_answer_dict)):
-            inner_list = []
-            for j in question_answer_dict[i].keys():
-                inner_list.append(question_answer_dict[i][j])
-            question_answer_list.append(inner_list)
-        return question_answer_dict, question_answer_list
+    def prepare_question_transmission(chapter_data_dict):
+        list = []
+        for key, value in chapter_data_dict.items():
+            text=str(value)
+            question_answer_dict = qg.generate(str(text))
+            question_answer_list = []
+            for i in range(len(question_answer_dict)):
+                inner_list = []
+                for j in question_answer_dict[i].keys():
+                    inner_list.append(question_answer_dict[i][j])
+                question_answer_list.append(inner_list)
+
+            for i in range(len(question_answer_list)):
+                new_list=[key]+question_answer_list[i]
+                list.append(new_list)
+        return list
 
     @staticmethod
-    def question_transmission_to_DB(lecture, chapter, question, answer):
+    def question_transmission_to_DB(level_one_list, list):
         dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
         myCursor = dbconn.cursor()
-        myCursor.execute(f"CALL add_question('{lecture}','{chapter}','{question}', '{answer}')")
+        lecture = level_one_list[0][0]
+        for i in range(len(list)):
+            chapter = list[i][0].replace("'", "")
+            question = list[i][1].replace("'", "")
+            answer = list[i][2].replace("'", "")
+            myCursor.execute(f"CALL add_question('{lecture}','{chapter}','{question}', '{answer}')")
         dbconn.commit()
         myCursor.close()
         dbconn.close()

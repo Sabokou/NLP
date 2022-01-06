@@ -24,9 +24,9 @@ def upload():
 @app.route('/uploader', methods = ['GET', 'POST']) # Success-Page after an Document has been upload
 def uploading_file():
    if request.method == 'POST':
-        qa_dict, qa_list, list = LF.upload_process(request)
+        LF.upload_process(request)
         return render_template("/includes/success.html", title='Success',
-                                   text=f"QA-Dict: {qa_dict}, QA-List: {qa_list}, Final list: {list}")
+                                   text="Your Data was succesfully transmitted to the Database.")
 
 
 @app.route('/learning', methods=['POST', 'GET'])  # Learning - Page

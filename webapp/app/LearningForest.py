@@ -49,38 +49,14 @@ class LearningForest:
         two_three_dict = Uploads.hierarchy(level_two_list, level_three_list)
         three_four_dict = Uploads.hierarchy(level_three_list, level_four_list)
         chapter_data_dict = Uploads.hierarchy(chapter_list, level_data_list)
-
-        list = []
-        list2=[]
-        list3=[]
-        for key, value in chapter_data_dict.items():
-            #text = "This is a test string."
-            text = str(value)
-            question_answer_dict = qg.generate(str(text))
-            list2.append(question_answer_dict)
-            question_answer_list = []
-            for i in range(len(question_answer_dict)):
-                inner_list = []
-                for j in question_answer_dict[i].keys():
-                    inner_list.append(question_answer_dict[i][j])
-                question_answer_list.append(inner_list)
-                list3.append(question_answer_list)
-            #question_answer_dict, question_answer_list = Uploads.prepare_question_transmission(value)
-            #question_answer_list=[["Question 1", "Answer 1"], ["Question 2", "Answer 2"]]
-            for i in range(len(question_answer_list)):
-                new_list=[key]+question_answer_list[i]
-                list.append(new_list)
-
+        qa_list = Uploads.prepare_question_transmission(chapter_data_dict)
         Content_list = Uploads.prepare_DB_transmission(level_one_list, chapter_data_dict)
         Uploads.transmission_to_DB(Content_list)
-        Hierarchy_list = Uploads.prepare_hierarchy_transmission(level_one_list, one_two_dict, two_three_dict,
-                                                                three_four_dict)
+        Hierarchy_list = Uploads.prepare_hierarchy_transmission(level_one_list, one_two_dict, two_three_dict, three_four_dict)
         Uploads.hierarchy_transmission_to_DB(Hierarchy_list)
-        Uploads.lecture_transmission_to_DB(level_one_list, html_text.replace("'", ""))
-        for i in range(len(list)):
-            Uploads.question_transmission_to_DB(level_one_list[0][0], list[i][0].replace("'", ""), list[i][1].replace("'", ""), list[i][2].replace("'", ""))
+        Uploads.lecture_transmission_to_DB(level_one_list, html_text)
+        Uploads.question_transmission_to_DB(level_one_list, qa_list)
 
-        return list2, list3, list
 
     @staticmethod
     def text_generation(request): # generates the text of a lecture for the learning-page
