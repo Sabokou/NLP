@@ -41,37 +41,46 @@ class LearningForest:
     @staticmethod
     def upload_process(request): #Upload- and Transmission-Process from a docx-document to the content in the Database
         path = Uploads.initial_upload(request)
-        text = Uploads.convert_to_html(path)
-        MyList = Uploads.parse_html(text)
+        html_text = Uploads.convert_to_html(path)
+        MyList = Uploads.parse_html(html_text)
         chapter_list = Uploads.chapter(MyList)
         level_one_list, level_two_list, level_three_list, level_four_list, level_data_list = Uploads.level(MyList)
         one_two_dict = Uploads.hierarchy(level_one_list, level_two_list)
         two_three_dict = Uploads.hierarchy(level_two_list, level_three_list)
         three_four_dict = Uploads.hierarchy(level_three_list, level_four_list)
         chapter_data_dict = Uploads.hierarchy(chapter_list, level_data_list)
-        for i in chapter_data_dict:
-            chapter_data_dict[i] = ' '.join(chapter_data_dict[i]).replace("'", "")
 
         list = []
         list2=[]
+        list3=[]
         for key, value in chapter_data_dict.items():
-            list2.append(qg.generate(str(value)))
+            #text = "This is a test string."
+            text = str(value)
+            question_answer_dict = qg.generate(str(text))
+            list2.append(question_answer_dict)
+            question_answer_list = []
+            for i in range(len(question_answer_dict)):
+                inner_list = []
+                for j in question_answer_dict[i].keys():
+                    inner_list.append(question_answer_dict[i][j])
+                question_answer_list.append(inner_list)
+                list3.append(question_answer_list)
             #question_answer_dict, question_answer_list = Uploads.prepare_question_transmission(value)
-            question_answer_list=[["Question 1", "Answer 1"], ["Question 2", "Answer 2"]]
+            #question_answer_list=[["Question 1", "Answer 1"], ["Question 2", "Answer 2"]]
             for i in range(len(question_answer_list)):
                 new_list=[key]+question_answer_list[i]
                 list.append(new_list)
 
         Content_list = Uploads.prepare_DB_transmission(level_one_list, chapter_data_dict)
-        #Uploads.transmission_to_DB(Content_list)
+        Uploads.transmission_to_DB(Content_list)
         Hierarchy_list = Uploads.prepare_hierarchy_transmission(level_one_list, one_two_dict, two_three_dict,
                                                                 three_four_dict)
-        #.hierarchy_transmission_to_DB(Hierarchy_list)
-        #Uploads.lecture_transmission_to_DB(level_one_list, text.replace("'", ""))
-        #for i in range(len(list)):
-        #    Uploads.question_transmission_to_DB(level_one_list[0][0], list[i][0], list[i][1], list[i][2])
+        Uploads.hierarchy_transmission_to_DB(Hierarchy_list)
+        Uploads.lecture_transmission_to_DB(level_one_list, html_text.replace("'", ""))
+        for i in range(len(list)):
+            Uploads.question_transmission_to_DB(level_one_list[0][0], list[i][0].replace("'", ""), list[i][1].replace("'", ""), list[i][2].replace("'", ""))
 
-        return list2
+        return list2, list3, list
 
     @staticmethod
     def text_generation(request): # generates the text of a lecture for the learning-page

@@ -107,6 +107,7 @@ class Uploads:
         lecture = level_one_list[0][0]
         Content_List = []
         for i in chapter_data_dict:
+            chapter_data_dict[i] = ' '.join(chapter_data_dict[i]).replace("'", "")
             Content_List.append([lecture, i, chapter_data_dict[i]])
         return Content_List
 
