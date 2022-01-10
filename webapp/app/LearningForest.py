@@ -66,7 +66,13 @@ class LearningForest:
         return select, text
 
     @staticmethod
-    def check_if_correct(correct_answer, my_answer): # calculates the similarity between the inserted answer and the correct answer by using TFIDF
+    def check_if_correct(request): # calculates the similarity between the inserted answer and the correct answer by using TFIDF
+        my_answer = request.form.get('answer')
+        question = request.form.get('question')
+        dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
+        correct_answer = pd.read_sql_query(f"""SELECT s_answer FROM questions WHERE s_question='{question}';""", dbconn)['s_answer'][0]
+        question_id = pd.read_sql_query(f"""SELECT n_question_id FROM questions WHERE s_question='{question}';""", dbconn)['n_question_id'][0]
+
         corpus = [my_answer, correct_answer]
         vect = TfidfVectorizer(min_df=1, stop_words="english")
         tfidf = vect.fit_transform(corpus)
@@ -75,12 +81,13 @@ class LearningForest:
         score = pairwise_similarity_arr[0][1]
         print(score)
         if score > 0.5: # if similarity is greater than 0,5 --> answer is classified as correct
-            return True
+            # change n_solved value to 1
+            return "Your answer was correct!"
         else:           # if similarity is less than 0,5 --> answer is classified as false
-            return False
+            return "Unfortunatly your answer was incorrect!"
 
     @staticmethod
-    def get_question_answer(request): # generates the text of a lecture for the learning-page
+    def get_question_answer(request):
         select = request.form.get('lectures')
         dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
         df = pd.read_sql_query(f"""SELECT * FROM QUESTIONS;""", dbconn)
