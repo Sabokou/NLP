@@ -60,6 +60,8 @@ def exercising():
 @app.route('/checking', methods=['POST', 'GET'])
 def checking():
     feedback = LF.check_if_correct(request)
-    return render_template("/checking.html",
-                            feedback = feedback)
+    return render_template("/includes/success.html", title='Success',
+                           text=feedback)
+    #return render_template("/checking.html",
+    #                        feedback = feedback)
 

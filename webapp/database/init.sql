@@ -106,7 +106,6 @@ FROM QUESTIONS AS Q LEFT JOIN CHAPTER AS C ON Q.n_chapter_id = C.n_chapter_id
 WHERE CR.n_qualificated = 1 AND CR.n_solved = 0 AND QR.n_solved = 0;
 
 
-
 -- Create procedures
 create or replace procedure add_content(
     s_lecture       VARCHAR(128),
