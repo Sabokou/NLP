@@ -1,5 +1,6 @@
 import psycopg2
 import pandas as pd
+import random
 from app.Uploads import Uploads
 from sklearn.feature_extraction.text import TfidfVectorizer
 #from app.QuestionGenerator.qg import QuestionGenerator
@@ -25,16 +26,6 @@ class LearningForest:
         dbconn.close()
         return lectures
 
-    @staticmethod
-    def exec_statement(str): # executes an sql-statement
-        dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
-        myCursor = dbconn.cursor()
-        myCursor.execute(str)
-        result = myCursor.fetchall()
-        dbconn.commit()
-        myCursor.close()
-        dbconn.close()
-        return result
 
     @staticmethod
     def upload_process(request): #Upload- and Transmission-Process from a docx-document to the content in the Database
@@ -66,6 +57,19 @@ class LearningForest:
         return select, text
 
     @staticmethod
+    def get_question(request):
+        select = request.form.get('lectures')
+        dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
+        result = pd.read_sql_query(f"""SELECT Question FROM Valid_Question_Overview WHERE Lecture='{select}';""", dbconn)
+        questions = list(result.values.tolist())
+        question = random.choice(questions)[0]
+        chapters = pd.read_sql_query(f"""SELECT Chapter FROM Valid_Question_Overview WHERE Lecture='{select}' AND Question = '{question}';""", dbconn)
+        chapters = list(chapters.values.tolist())
+        chapter = chapters[0][0]
+        return select, chapter, question
+
+
+    @staticmethod
     def check_if_correct(correct_answer, my_answer): # calculates the similarity between the inserted answer and the correct answer by using TFIDF
         corpus = [my_answer, correct_answer]
         vect = TfidfVectorizer(min_df=1, stop_words="english")
@@ -78,25 +82,3 @@ class LearningForest:
             return True
         else:           # if similarity is less than 0,5 --> answer is classified as false
             return False
-
-    @staticmethod
-    def get_question_answer(request): # generates the text of a lecture for the learning-page
-        select = request.form.get('lectures')
-        dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
-        df = pd.read_sql_query(f"""SELECT * FROM QUESTIONS;""", dbconn)
-        questions = df.to_dict('records')
-        for question in questions:
-            if int(pd.read_sql_query(f"""SELECT n_solved FROM question_results WHERE n_question_id={int(question['n_question_id'])};""", dbconn)['n_solved'][0]) == 0:
-                return(question)
-
-    @staticmethod
-    def get_chapter(id): 
-        dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
-        chapter = pd.read_sql_query(f"""SELECT s_chapter FROM chapter WHERE n_chapter_id={int(id)};""", dbconn)['s_chapter'][0]
-        return chapter
-
-    @staticmethod
-    def get_lecture(id): 
-        dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
-        lecture = pd.read_sql_query(f"""SELECT s_lecture FROM chapter WHERE n_chapter_id={int(id)};""", dbconn)['s_lecture'][0]
-        return lecture

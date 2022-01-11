@@ -98,6 +98,14 @@ SELECT C.s_lecture AS Lecture, ROUND(AVG(CR.n_solved),2) AS Completed
 FROM CHAPTER_RESULTS AS CR LEFT JOIN CHAPTER  AS C ON CR.n_chapter_id = C.n_chapter_id
 GROUP BY C.s_lecture;
 
+CREATE VIEW Valid_Question_Overview AS
+SELECT C.s_lecture AS Lecture, C.s_chapter AS Chapter, Q.s_question AS Question, Q.s_answer AS Answer
+FROM QUESTIONS AS Q LEFT JOIN CHAPTER AS C ON Q.n_chapter_id = C.n_chapter_id
+                    LEFT JOIN CHAPTER_RESULTS AS CR ON CR.n_chapter_id = C.n_chapter_id
+                    LEFT JOIN QUESTION_RESULTS AS QR ON Q.n_question_id=QR.n_question_id
+WHERE CR.n_qualificated = 1 AND CR.n_solved = 0 AND QR.n_solved = 0;
+
+
 
 -- Create procedures
 create or replace procedure add_content(

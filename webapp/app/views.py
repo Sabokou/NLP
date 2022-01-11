@@ -50,9 +50,7 @@ def exercise():
 def exercising():
     if request.method == 'POST':
         if request.form['btn_start'] == 'start':
-            question = LF.get_question_answer(request)
-            chapter = LF.get_chapter(question['n_chapter_id'])
-            lecture = LF.get_lecture(question['n_chapter_id'])
+            lecture, chapter, question = LF.get_question(request)
             return render_template("/exercising.html",
                                     question = question,
                                     chapter = chapter,
