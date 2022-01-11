@@ -57,8 +57,19 @@ class LearningForest:
         return select, text
 
     @staticmethod
-    def check_if_correct(
-            request):  # calculates the similarity between the inserted answer and the correct answer by using TFIDF
+    def get_question(request):
+        select = request.form.get('lectures')
+        dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
+        result = pd.read_sql_query(f"""SELECT Question FROM Valid_Question_Overview WHERE Lecture='{select}';""", dbconn)
+        questions = list(result.values.tolist())
+        question = random.choice(questions)[0]
+        chapters = pd.read_sql_query(f"""SELECT Chapter FROM Valid_Question_Overview WHERE Lecture='{select}' AND Question = '{question}';""", dbconn)
+        chapters = list(chapters.values.tolist())
+        chapter = chapters[0][0]
+        return select, chapter, question
+
+    @staticmethod
+    def check_if_correct(request):  # calculates the similarity between the inserted answer and the correct answer by using TFIDF
         my_answer = request.form.get('answer')
         question = request.form.get('question')
         dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
@@ -80,21 +91,4 @@ class LearningForest:
             return "Your answer was correct!"
         else:  # if similarity is less than 0,5 --> answer is classified as false
             return "Unfortunatly your answer was incorrect!"
-
-
-@staticmethod
-    def get_question(request):
-        select = request.form.get('lectures')
-        dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
-        result = pd.read_sql_query(f"""SELECT Question FROM Valid_Question_Overview WHERE Lecture='{select}';""",
-                                   dbconn)
-        questions = list(result.values.tolist())
-        question = random.choice(questions)[0]
-        chapters = pd.read_sql_query(
-            f"""SELECT Chapter FROM Valid_Question_Overview WHERE Lecture='{select}' AND Question = '{question}';""",
-            dbconn)
-        chapters = list(chapters.values.tolist())
-        chapter = chapters[0][0]
-        return select, chapter, question
-
 
