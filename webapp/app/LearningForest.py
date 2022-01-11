@@ -57,8 +57,7 @@ class LearningForest:
         return select, text
 
     @staticmethod
-    def get_question(request):
-        select = request.form.get('lectures')
+    def get_question(select):
         dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
         result = pd.read_sql_query(f"""SELECT Question FROM Valid_Question_Overview WHERE Lecture='{select}';""", dbconn)
         questions = list(result.values.tolist())
@@ -83,10 +82,13 @@ class LearningForest:
         pairwise_similarity = tfidf * tfidf.T
         pairwise_similarity_arr = pairwise_similarity.toarray()
         score = pairwise_similarity_arr[0][1]
-        return score
-        #if score > 0.5:  # if similarity is greater than 0,5 --> answer is classified as correct
+        if score > 0.5:  # if similarity is greater than 0,5 --> answer is classified as correct
             # change n_solved value to 1
-        #    return "Your answer was correct!"
-        #else:  # if similarity is less than 0,5 --> answer is classified as false
-        #    return "Unfortunatly your answer was incorrect!"
+            return True, correct_answer, my_answer
+        else:           # if similarity is less than 0,5 --> answer is classified as false
+            return False, correct_answer, my_answer
 
+    @staticmethod
+    def correct(question):
+        #process correct question
+        return

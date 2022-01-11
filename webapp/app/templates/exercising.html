@@ -5,17 +5,17 @@
 {% block heading %}Exercise{% endblock %}
 {% block body %}
 
-
     <form action = "http://localhost:5000/checking" method="POST" enctype = "multipart/form-data">
-            <h3 class="mb-3"> {{ lecture }}</h3>
-            <label class="form-label">Question (Chapter {{ chapter }})</label>
-            <input readonly value='{{ question }}' class="mb-3 form-control" name= question>
+        <p>{{ test }}</p>
+        <h3 class="mb-3"> {{ lecture }}</h3>
+        <label class="form-label">Question (Chapter {{ chapter }})</label>
+        <input readonly value='{{ question }}' class="mb-3 form-control" name= question>
 
-            <label class="form-label">Answer</label>
-            <input id="answer" class="form-control" name= answer>
-            <div class="form-text">
-                Please answer the question in short and correct sentences.
-            </div>
+        <label class="form-label">Answer</label>
+        <input id="answer" class="form-control" name= answer>
+        <div class="form-text">
+            Please answer the question in short and correct sentences.
+        </div>
         <div class="d-flex">
             <button type="submit" name="btn_start" value="start" class="btn btn-primary">Submit</button>
         </div>

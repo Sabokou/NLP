@@ -1,4 +1,6 @@
+from sys import _current_frames
 from flask import render_template, request, flash, redirect, url_for
+from numpy import quantile
 from app import app
 from app.LearningForest import LearningForest
 import pandas as pd
@@ -6,6 +8,11 @@ import psycopg2
 
 LF = LearningForest()
 
+#defining global variables
+user_answer = ""
+correct_answer = ""
+selected_lecture = ""
+current_question = ""
 
 # Page Functions
 @app.route('/')  # Overview - Page
@@ -48,20 +55,50 @@ def exercise():
 
 @app.route('/exercising', methods=['POST', 'GET'])
 def exercising():
-    if request.method == 'POST':
-        if request.form['btn_start'] == 'start':
-            lecture, chapter, question = LF.get_question(request)
-            return render_template("/exercising.html",
-                                    question = question,
-                                    chapter = chapter,
-                                    lecture = lecture)
+    global selected_lecture
+    global current_question
+    lecture, chapter, current_question = LF.get_question(request.form.get('lectures'))
+    selected_lecture = lecture
 
+    return render_template("/exercising.html",
+                            question = current_question,
+                            chapter = chapter,
+                            lecture = lecture)
+
+@app.route('/exercising2', methods=['POST', 'GET'])
+def exercising2():
+    global selected_lecture
+    global current_question
+
+    #for check:
+    if request.method == 'POST':
+        if request.form['correct'] == 'correct':
+            LF.correct(current_question)
+
+    lecture, chapter, question = LF.get_question(selected_lecture)
+    return render_template("/exercising.html",
+                            question = question,
+                            chapter = chapter,
+                            lecture = lecture)
 
 @app.route('/checking', methods=['POST', 'GET'])
 def checking():
-    feedback = LF.check_if_correct(request)
-    return render_template("/includes/success.html", title='Success',
-                           text=feedback)
-    #return render_template("/checking.html",
-    #                        feedback = feedback)
+    global user_answer
+    global correct_answer
+    global current_question
 
+    feedback, correct_answer, user_answer = LF.check_if_correct(request)
+
+    if feedback == True:
+        LF.correct(current_question)
+        return render_template("/correct.html")
+    else:
+        return render_template("/false.html")
+
+@app.route('/check', methods=['POST', 'GET'])
+def check():
+    global user_answer
+    global correct_answer
+    return render_template("/check.html",
+                            user_answer = user_answer,
+                            correct_answer = correct_answer)
