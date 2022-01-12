@@ -93,7 +93,6 @@ def checking():
         LF.correct_answer(current_question)
         return render_template("/correct.html")
     else:
-        LF.false_answer(current_question)
         return render_template("/false.html")
 
 @app.route('/check', methods=['POST', 'GET'])

@@ -100,4 +100,10 @@ class LearningForest:
 
     @staticmethod
     def false_answer(question):
+        dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
+        myCursor = dbconn.cursor()
+        myCursor.execute(f"CALL wrong_answer('{question}')")
+        dbconn.commit()
+        myCursor.close()
+        dbconn.close()
         return

@@ -52,8 +52,8 @@ CREATE TABLE IF NOT EXISTS QUESTION_RESULTS
 CREATE TABLE IF NOT EXISTS CHAPTER_RESULTS
 (
    n_chapter_id     INT NOT NULL,
-   n_qualificated   INT NOT NULL, --0=FALSE, 1=TRUE
-   n_solved         INT NOT NULL, --0=FALSE, 1=TRUE
+   n_qualificated   INT NOT NULL, --0= Not qualificated, 1=Qualificated, 2=Disqualificated
+   n_solved         INT NOT NULL, --0=Not solved, 1=Solved
    FOREIGN KEY (n_chapter_id) REFERENCES CHAPTER (n_chapter_id) ON DELETE CASCADE
 );
 
@@ -99,12 +99,18 @@ FROM CHAPTER_RESULTS AS CR LEFT JOIN CHAPTER  AS C ON CR.n_chapter_id = C.n_chap
 GROUP BY C.s_lecture;
 
 CREATE VIEW Valid_Question_Overview AS
-SELECT C.s_lecture AS Lecture, C.s_chapter AS Chapter, Q.s_question AS Question, Q.s_answer AS Answer
+SELECT C.s_lecture AS Lecture, C.n_chapter_id AS Chapter_id, C.s_chapter AS Chapter, Q.s_question AS Question, Q.s_answer AS Answer, QR.n_solved AS Solved
 FROM QUESTIONS AS Q LEFT JOIN CHAPTER AS C ON Q.n_chapter_id = C.n_chapter_id
                     LEFT JOIN CHAPTER_RESULTS AS CR ON CR.n_chapter_id = C.n_chapter_id
                     LEFT JOIN QUESTION_RESULTS AS QR ON Q.n_question_id=QR.n_question_id
 WHERE CR.n_qualificated = 1 AND CR.n_solved = 0 AND QR.n_solved = 0;
 
+CREATE VIEW Wrong_Chapter_Question_Overview AS
+SELECT C.n_chapter_id AS Chapter_id, Q.n_question_id AS Question_id, QR.n_solved AS Solved
+FROM QUESTIONS AS Q LEFT JOIN CHAPTER AS C ON Q.n_chapter_id = C.n_chapter_id
+                    LEFT JOIN CHAPTER_RESULTS AS CR ON CR.n_chapter_id = C.n_chapter_id
+                    LEFT JOIN QUESTION_RESULTS AS QR ON Q.n_question_id=QR.n_question_id
+WHERE CR.n_qualificated = 1 AND CR.n_solved = 0 AND QR.n_solved = 2;
 
 -- Create procedures
 create or replace procedure add_content(
@@ -191,14 +197,30 @@ AS
 $$
 DECLARE
     question_id      INT;
+    chapter_id_txt   INT;
 
 BEGIN
 
     question_id := (SELECT n_question_id FROM QUESTIONS WHERE s_question = s_question_txt);
+    chapter_id_txt := (SELECT n_chapter_id FROM QUESTIONS WHERE s_question = s_question_txt);
 
-    UPDATE QUESTION_RESULTS
-    SET n_solved = 2
-    WHERE n_question_id = question_id;
+    IF EXISTS(SELECT * FROM Wrong_Chapter_Question_Overview WHERE Chapter_id = chapter_id_txt)
+    THEN
+        UPDATE QUESTION_RESULTS
+        SET n_solved = 2
+        WHERE n_question_id = question_id;
+
+        UPDATE CHAPTER_RESULTS
+        SET n_qualificated = 2
+        WHERE n_chapter_id = chapter_id_txt;
+
+    ELSE
+        UPDATE QUESTION_RESULTS
+        SET n_solved = 2
+        WHERE n_question_id = question_id;
+
+    END IF;
+
 END
 $$
 ;
@@ -213,19 +235,30 @@ $$
 DECLARE
     question_id      INT;
     chapter_id       INT;
+    sub_chapter_list INT[];
+    sub_chapter      INT;
 
 BEGIN
 
     question_id := (SELECT n_question_id FROM QUESTIONS WHERE s_question = s_question_txt);
     chapter_id := (SELECT n_chapter_id FROM QUESTIONS WHERE s_question = s_question_txt);
+    sub_chapter_list := ARRAY(SELECT n_sub_chapter_id FROM HIERARCHY WHERE n_super_chapter_id = chapter_id);
 
     UPDATE QUESTION_RESULTS
     SET n_solved = 1
     WHERE n_question_id = question_id;
 
-    UPDATE QUESTION_RESULTS
+    UPDATE CHAPTER_RESULTS
     SET n_solved = 1
     WHERE n_chapter_id = chapter_id;
+
+    FOREACH sub_chapter IN ARRAY sub_chapter_list
+        LOOP
+            UPDATE CHAPTER_RESULTS
+            SET n_qualificated = 1
+            WHERE n_chapter_id = sub_chapter;
+        END loop;
+
 
 END
 $$
