@@ -89,6 +89,11 @@ class LearningForest:
             return False, correct_answer, my_answer
 
     @staticmethod
-    def correct(question):
-        #process correct question
+    def correct_answer(question):
+        dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
+        myCursor = dbconn.cursor()
+        myCursor.execute(f"CALL correct_answer('{question}')")
+        dbconn.commit()
+        myCursor.close()
+        dbconn.close()
         return

@@ -90,7 +90,7 @@ def checking():
     feedback, correct_answer, user_answer = LF.check_if_correct(request)
 
     if feedback == True:
-        LF.correct(current_question)
+        LF.correct_answer(current_question)
         return render_template("/correct.html")
     else:
         return render_template("/false.html")

@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS HIERARCHY
 CREATE TABLE IF NOT EXISTS QUESTION_RESULTS
 (
    n_question_id     INT NOT NULL,
-   n_solved         INT NOT NULL, --0=FALSE, 1=TRUE
+   n_solved         INT NOT NULL, --0=Not answered, 1=Answered correctly, 2=Answered falsely
    FOREIGN KEY (n_question_id) REFERENCES QUESTIONS (n_question_id) ON DELETE CASCADE
 );
 
@@ -182,4 +182,51 @@ END
 $$
 ;
 
+create or replace procedure wrong_answer(
+    s_question_txt       VARCHAR(100000)
+)
 
+    language plpgsql
+AS
+$$
+DECLARE
+    question_id      INT;
+
+BEGIN
+
+    question_id := (SELECT n_question_id FROM QUESTIONS WHERE s_question = s_question_txt);
+
+    UPDATE QUESTION_RESULTS
+    SET n_solved = 2
+    WHERE n_question_id = question_id;
+END
+$$
+;
+
+create or replace procedure correct_answer(
+    s_question_txt       VARCHAR(100000)
+)
+
+    language plpgsql
+AS
+$$
+DECLARE
+    question_id      INT;
+    chapter_id       INT;
+
+BEGIN
+
+    question_id := (SELECT n_question_id FROM QUESTIONS WHERE s_question = s_question_txt);
+    chapter_id := (SELECT n_chapter_id FROM QUESTIONS WHERE s_question = s_question_txt);
+
+    UPDATE QUESTION_RESULTS
+    SET n_solved = 1
+    WHERE n_question_id = question_id;
+
+    UPDATE QUESTION_RESULTS
+    SET n_solved = 1
+    WHERE n_chapter_id = chapter_id;
+
+END
+$$
+;
