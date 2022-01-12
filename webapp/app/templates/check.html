@@ -3,21 +3,22 @@
 {% block heading %}Exercise{% endblock %}
 {% block body %}
 <div>
-    <form action = "http://localhost:5000/exercising2" method="POST" enctype = "multipart/form-data">
-        <h4>Here you can check if you agree with the algorithms choice</h4>
-        
-        <label class="form-label">Your Answer</label>
-        <input readonly value='{{ user_answer }}' class="mb-3 form-control">
-
-        <label class="form-label">Correct Answer</label>
-        <input readonly value='{{ correct_answer }}' class="mb-3 form-control">
-        
-        <label class="mb-3 form-label">Your Answer was...</label>
-        <div>
-            <button name="correct" value="correct" class="btn btn-success">Correct</button>
-            <a href="/exercising2" class="btn btn-danger">Incorrect</a>
-        </div>
-    </form>
+    <h4>Here you can check if you agree with the algorithms choice</h4>
+    
+    <label class="form-label">Your Answer</label>
+    <input readonly value='{{ user_answer }}' class="mb-3 form-control">
+    <label class="form-label">Correct Answer</label>
+    <input readonly value='{{ correct_answer }}' class="mb-3 form-control">
+    
+    <label class="mb-3 form-label">Your Answer was...</label>
+    <div class="d-flex flex-row">
+        <form action = "http://localhost:5000/exercising2" method="POST" enctype = "multipart/form-data">
+            <button name="correct" value="correct" class="btn btn-success me-3">Correct</button>
+        </form>
+        <form action = "http://localhost:5000/false" method="POST" enctype = "multipart/form-data">
+            <button name="incorrect" value="incorrect" class="btn btn-danger">Incorrect</button>
+        </form>
+    </div>
 </div>
 
 

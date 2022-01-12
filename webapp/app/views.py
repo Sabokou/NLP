@@ -73,11 +73,11 @@ def exercising2():
     #for check:
     if request.method == 'POST':
         if request.form['correct'] == 'correct':
-            LF.correct(current_question)
+            LF.correct_answer(current_question)
 
-    lecture, chapter, question = LF.get_question(selected_lecture)
+    lecture, chapter, current_question = LF.get_question(selected_lecture)
     return render_template("/exercising.html",
-                            question = question,
+                            question = current_question,
                             chapter = chapter,
                             lecture = lecture)
 
@@ -93,6 +93,7 @@ def checking():
         LF.correct_answer(current_question)
         return render_template("/correct.html")
     else:
+        LF.false_answer(current_question)
         return render_template("/false.html")
 
 @app.route('/check', methods=['POST', 'GET'])
@@ -102,3 +103,9 @@ def check():
     return render_template("/check.html",
                             user_answer = user_answer,
                             correct_answer = correct_answer)
+
+@app.route('/false', methods=['POST', 'GET'])
+def false():
+    global current_question
+    LF.false_answer(current_question)
+    return render_template("/false2.html")

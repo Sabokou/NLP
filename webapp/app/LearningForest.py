@@ -97,3 +97,7 @@ class LearningForest:
         myCursor.close()
         dbconn.close()
         return
+
+    @staticmethod
+    def false_answer(question):
+        return
