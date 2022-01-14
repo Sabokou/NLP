@@ -105,12 +105,21 @@ FROM QUESTIONS AS Q LEFT JOIN CHAPTER AS C ON Q.n_chapter_id = C.n_chapter_id
                     LEFT JOIN QUESTION_RESULTS AS QR ON Q.n_question_id=QR.n_question_id
 WHERE CR.n_qualificated = 1 AND CR.n_solved = 0 AND QR.n_solved = 0;
 
+
 CREATE VIEW Wrong_Chapter_Question_Overview AS
-SELECT C.n_chapter_id AS Chapter_id, Q.n_question_id AS Question_id, QR.n_solved AS Solved
+SELECT C.n_chapter_id AS Chapter_id, C.s_chapter AS Chapter, Q.n_question_id AS Question_id, QR.n_solved AS Solved
 FROM QUESTIONS AS Q LEFT JOIN CHAPTER AS C ON Q.n_chapter_id = C.n_chapter_id
                     LEFT JOIN CHAPTER_RESULTS AS CR ON CR.n_chapter_id = C.n_chapter_id
                     LEFT JOIN QUESTION_RESULTS AS QR ON Q.n_question_id=QR.n_question_id
 WHERE CR.n_qualificated = 1 AND CR.n_solved = 0 AND QR.n_solved = 2;
+
+CREATE VIEW Named_Hierarchy_1 AS
+SELECT C.s_chapter AS Super_chapter, H.n_sub_chapter_id AS Sub_chapter_id
+FROM HIERARCHY AS H LEFT JOIN CHAPTER AS C ON H.n_super_chapter_id = C.n_chapter_id;
+
+CREATE VIEW Named_Hierarchy_2 AS
+SELECT H.Super_chapter AS Super_chapter, C.s_chapter AS Sub_chapter
+FROM Named_Hierarchy_1 AS H LEFT JOIN CHAPTER AS C ON H.Sub_chapter_id = C.n_chapter_id;
 
 -- Create procedures
 create or replace procedure add_content(

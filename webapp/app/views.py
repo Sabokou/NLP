@@ -9,14 +9,12 @@ import psycopg2
 LF = LearningForest()
 
 #defining global variables
-user_answer = ""
-correct_answer = ""
 selected_lecture = ""
-current_question = ""
+
 
 # Page Functions
 @app.route('/')  # Overview - Page
-def index():
+def overview():
     dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
     result = pd.read_sql_query(f"""SELECT * FROM Result_Overview;""", dbconn)
     return render_template("includes/table.html", column_names=result.columns.values,
@@ -53,58 +51,110 @@ def exercise():
     lectures = LF.dropdown_lecture()
     return render_template("/exercise.html", lectures=lectures)
 
-@app.route('/exercising', methods=['POST', 'GET'])
-def exercising():
+@app.route('/initial_exercising', methods=['POST', 'GET'])
+def initial_exercising():
     global selected_lecture
-    global current_question
-    lecture, chapter, current_question = LF.get_question(request.form.get('lectures'))
-    selected_lecture = lecture
+
+    selected_lecture = request.form.get('lectures')
+    lecture, chapter, current_question = LF.get_question(selected_lecture)
 
     return render_template("/exercising.html",
                             question = current_question,
                             chapter = chapter,
                             lecture = lecture)
 
-@app.route('/exercising2', methods=['POST', 'GET'])
-def exercising2():
+@app.route('/further_exercising', methods=['POST', 'GET'])
+def further_exercising():
     global selected_lecture
-    global current_question
-
-    #for check:
-    if request.method == 'POST':
-        if request.form['correct'] == 'correct':
-            LF.correct_answer(current_question)
 
     lecture, chapter, current_question = LF.get_question(selected_lecture)
+
     return render_template("/exercising.html",
-                            question = current_question,
-                            chapter = chapter,
-                            lecture = lecture)
+                           question=current_question,
+                           chapter=chapter,
+                           lecture=lecture)
+
 
 @app.route('/checking', methods=['POST', 'GET'])
 def checking():
-    global user_answer
-    global correct_answer
-    global current_question
+    current_score, correct_answer, user_answer, current_question = LF.check_if_correct(request)
 
-    feedback, correct_answer, user_answer = LF.check_if_correct(request)
 
-    if feedback == True:
+    if current_score > 0.5:
         LF.correct_answer(current_question)
-        return render_template("/correct.html")
+        current_chapter, sub_chapter, next_chapter = LF.get_chapter_and_subchapter(current_question, selected_lecture)
+        if next_chapter == False:
+            result = LF.exercising_done(selected_lecture)
+            return render_template("/exercising_done_positive.html",
+                                   Text=f"Our algorithm classified your answer as correct! (Score: {current_score})",
+                                   Chapter=current_chapter,
+                                   Result = result)
+        if sub_chapter == []:
+            return render_template("/correct.html",
+                                   Text=f"Our algorithm classified your answer as correct! (Score: {current_score})",
+                                   Chapter=current_chapter,
+                                   Subchapter_Text="",
+                                   Next=next_chapter)
+        return render_template("/correct.html",
+                               Text = f"Our algorithm classified your answer as correct! (Score: {current_score})",
+                               Chapter = current_chapter,
+                               Subchapter_Text = f"You have qualified yourself for the following chapters: {sub_chapter}",
+                               Next = next_chapter)
     else:
-        return render_template("/false.html")
-
-@app.route('/check', methods=['POST', 'GET'])
-def check():
-    global user_answer
-    global correct_answer
-    return render_template("/check.html",
+        return render_template("/check.html",
+                            Score = current_score,
+                            question = current_question,
                             user_answer = user_answer,
                             correct_answer = correct_answer)
 
-@app.route('/false', methods=['POST', 'GET'])
-def false():
-    global current_question
-    LF.false_answer(current_question)
-    return render_template("/false2.html")
+
+@app.route('/evaluating', methods=['POST', 'GET'])
+def evaluating():
+    if request.method == 'POST':
+        current_question = request.form.get('question')
+        if request.form.get('correct') == 'correct':
+            LF.correct_answer(current_question)
+            current_chapter, sub_chapter, next_chapter = LF.get_chapter_and_subchapter(current_question, selected_lecture)
+            if next_chapter == False:
+                result = LF.exercising_done(selected_lecture)
+                return render_template("/exercising_done_positive.html",
+                                       Text="You classified your answer as correct!",
+                                       Chapter=current_chapter,
+                                       Result=result)
+            if sub_chapter == []:
+                return render_template("/correct.html",
+                                       Text="You classified your answer as correct!",
+                                       Chapter=current_chapter,
+                                       Subchapter_Text="",
+                                       Next=next_chapter)
+            return render_template("/correct.html",
+                                   Text="You classified your answer as correct!",
+                                   Chapter=current_chapter,
+                                   Subchapter_Text=f"You have qualified yourself for the following chapters: {sub_chapter}",
+                                   Next=next_chapter)
+        elif request.form.get('incorrect') == 'incorrect':
+            dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
+            chapter = pd.read_sql_query(f"""SELECT chapter.s_chapter FROM questions  LEFT JOIN chapter ON questions.n_chapter_id = chapter.n_chapter_id WHERE questions.s_question='{current_question}';""",dbconn)
+            chapter = list(chapter.values.tolist())
+            chapter = chapter[0][0]
+            dbconn.close()
+            first_try = LF.check_for_first_try(chapter)
+            LF.false_answer(current_question)
+            current_chapter, sub_chapter, next_chapter = LF.get_chapter_and_subchapter(current_question, selected_lecture)
+            if next_chapter == False:
+                result = LF.exercising_done(selected_lecture)
+                return render_template("/exercising_done_negative.html",
+                                       Text="You classified your answer as false!",
+                                       Chapter=current_chapter,
+                                       Result=result)
+
+            if first_try == True:
+                return render_template("/false.html",
+                                       Text= f"This was your first try for chapter {current_chapter}. You have one try left.",
+                                       Button_Text = f"Try again chapter {current_chapter}")
+            else:
+                return render_template("/false.html",
+                                       Text = f"This was your second try. You have disqualified yourself from chapter {current_chapter}",
+                                       Button_Text=f"Go on to chapter {next_chapter}")
+
+

@@ -1,10 +1,12 @@
 {% extends "includes/raw.html" %}
-{% block title %}Exercise{% endblock %}
-{% block heading %}Exercise{% endblock %}
+{% block title %}Success{% endblock %}
+{% block heading %}Success{% endblock %}
 {% block body %}
 <div>
-    <h3 style="color: green;">Our algorithm classified your answer as correct!</h3>
-    <a href="/exercising2" class="btn btn-primary mt-3">Next Question</a>
+    <h3 style="color: green;">{{ Text }}</h3>
+    <h5>You have solved chapter {{ Chapter }}</h5>
+    <h5>{{ Subchapter_Text }}</h5>
+    <a href="/further_exercising" class="btn btn-primary mt-3">Go on to chapter {{ Next }}</a>
 </div>
 
 

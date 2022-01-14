@@ -3,11 +3,8 @@
 {% block heading %}Exercise{% endblock %}
 {% block body %}
 
-<h3 style="color: red;">Our algorithm classified your answer as incorrect!</h3>
-<div>
-    <a href="/check">If you disagree with the algorithm click here.</a>
-</div>
-
-<a href="/exercising2" class="btn btn-primary mt-3">Next Question</a>
+<h3 style="color: red;">You classified your answer as false!</h3>
+<h5>{{ Text }}</h5>
+<a href="/further_exercising" class="btn btn-primary mt-3">{{ Button_Text }}</a>
 
 {% endblock %}

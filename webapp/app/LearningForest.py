@@ -54,17 +54,23 @@ class LearningForest:
         result = pd.read_sql_query(f"""SELECT s_content FROM LECTURE WHERE s_lecture='{select}';""", dbconn)
         row_data = list(result.values.tolist())
         text = row_data[0][0]
+        dbconn.close()
         return select, text
 
     @staticmethod
     def get_question(select):
         dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
-        result = pd.read_sql_query(f"""SELECT Question FROM Valid_Question_Overview WHERE Lecture='{select}';""", dbconn)
+        next_chapter = pd.read_sql_query(f"""SELECT Chapter FROM Valid_Question_Overview WHERE Lecture='{select}' ORDER BY Chapter_id;""", dbconn)
+        next_chapter = list(next_chapter.values.tolist())
+        next_chapter = next_chapter[0][0]
+        result = pd.read_sql_query(f"""SELECT Question FROM Valid_Question_Overview WHERE Lecture='{select}' AND Chapter = '{next_chapter}';""", dbconn)
         questions = list(result.values.tolist())
-        question = random.choice(questions)[0]
+        question = random.choice(questions)
+        question = question[0]
         chapters = pd.read_sql_query(f"""SELECT Chapter FROM Valid_Question_Overview WHERE Lecture='{select}' AND Question = '{question}';""", dbconn)
         chapters = list(chapters.values.tolist())
         chapter = chapters[0][0]
+        dbconn.close()
         return select, chapter, question
 
     @staticmethod
@@ -82,11 +88,27 @@ class LearningForest:
         pairwise_similarity = tfidf * tfidf.T
         pairwise_similarity_arr = pairwise_similarity.toarray()
         score = pairwise_similarity_arr[0][1]
-        if score > 0.5:  # if similarity is greater than 0,5 --> answer is classified as correct
-            # change n_solved value to 1
-            return True, correct_answer, my_answer
-        else:           # if similarity is less than 0,5 --> answer is classified as false
-            return False, correct_answer, my_answer
+        score = round(score, 2)
+        return score, correct_answer, my_answer, question
+
+    @staticmethod
+    def get_chapter_and_subchapter(current_question, selected_lecture):
+        dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
+        chapter = pd.read_sql_query(f"""SELECT chapter.s_chapter FROM questions  LEFT JOIN chapter ON questions.n_chapter_id = chapter.n_chapter_id WHERE questions.s_question='{current_question}';""", dbconn)
+        chapter = list(chapter.values.tolist())
+        chapter = chapter[0][0]
+        subchapter = pd.read_sql_query(f"""SELECT sub_chapter FROM named_hierarchy_2 WHERE super_chapter = '{chapter}' """, dbconn)
+        subchapter = list(subchapter.values.tolist())
+        next_chapter = pd.read_sql_query(f"""SELECT Chapter FROM Valid_Question_Overview WHERE Lecture='{selected_lecture}' ORDER BY Chapter_id;""", dbconn)
+        next_chapter = list(next_chapter.values.tolist())
+        dbconn.close()
+        if next_chapter != []:
+            next_chapter = next_chapter[0][0]
+            return chapter, subchapter, next_chapter
+        else:
+            return chapter, subchapter, False
+
+
 
     @staticmethod
     def correct_answer(question):
@@ -96,7 +118,7 @@ class LearningForest:
         dbconn.commit()
         myCursor.close()
         dbconn.close()
-        return
+        return True
 
     @staticmethod
     def false_answer(question):
@@ -106,4 +128,26 @@ class LearningForest:
         dbconn.commit()
         myCursor.close()
         dbconn.close()
-        return
+        return True
+
+    @staticmethod
+    def check_for_first_try(current_chapter):
+        dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
+        chapter = pd.read_sql_query(f"""SELECT Question_id FROM Wrong_Chapter_Question_Overview WHERE Chapter='{current_chapter}';""",dbconn)
+        chapter = list(chapter.values.tolist())
+        dbconn.close()
+        if chapter == []:
+            return True
+        else:
+            return False
+
+
+
+
+    @staticmethod
+    def exercising_done(selected_lecture):
+        dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
+        result = pd.read_sql_query(f"""SELECT completed FROM Result_Overview WHERE lecture='{selected_lecture}';""", dbconn)
+        result = list(result.values.tolist())
+        result = result[0][0]*100
+        return result

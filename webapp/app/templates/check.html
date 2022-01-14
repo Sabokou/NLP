@@ -3,22 +3,24 @@
 {% block heading %}Exercise{% endblock %}
 {% block body %}
 <div>
+    <h3 style="color: red;">Our algorithm classified your answer as incorrect! (Score: {{ Score }})</h3>
     <h4>Here you can check if you agree with the algorithms choice</h4>
-    
+    <form action = "http://localhost:5000/evaluating" method="POST" enctype = "multipart/form-data">
+    <label class="form-label">The question</label>
+    <input readonly value='{{ question }}' class="mb-3 form-control" name= question>
     <label class="form-label">Your Answer</label>
-    <input readonly value='{{ user_answer }}' class="mb-3 form-control">
+    <input readonly value='{{ user_answer }}' class="mb-3 form-control" name = user_answer>
     <label class="form-label">Correct Answer</label>
-    <input readonly value='{{ correct_answer }}' class="mb-3 form-control">
-    
-    <label class="mb-3 form-label">Your Answer was...</label>
+    <input readonly value='{{ correct_answer }}' class="mb-3 form-control" name = correct_answer>
+
+    <label class="mb-3 form-label">My answer was ... </label>
     <div class="d-flex flex-row">
-        <form action = "http://localhost:5000/exercising2" method="POST" enctype = "multipart/form-data">
-            <button name="correct" value="correct" class="btn btn-success me-3">Correct</button>
-        </form>
-        <form action = "http://localhost:5000/false" method="POST" enctype = "multipart/form-data">
-            <button name="incorrect" value="incorrect" class="btn btn-danger">Incorrect</button>
-        </form>
+        <button name=incorrect value="incorrect" class="btn btn-danger">Incorrect *</button>
+        <button name=correct value="correct" class="btn btn-success me-3">Correct **</button>
     </div>
+        <div>* I agree with the algorithm that my answer was incorrect. </div>
+        <div>** I disagree with the algorithm, because I think that my answer was correct. </div>
+    </form>
 </div>
 
 
