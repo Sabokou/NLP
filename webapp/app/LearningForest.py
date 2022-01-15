@@ -58,6 +58,15 @@ class LearningForest:
         return select, text
 
     @staticmethod
+    def reset(select):
+        dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
+        myCursor = dbconn.cursor()
+        myCursor.execute(f"CALL reset('{select}')")
+        dbconn.commit()
+        myCursor.close()
+        dbconn.close()
+
+    @staticmethod
     def get_question(select):
         dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
         next_chapter = pd.read_sql_query(f"""SELECT Chapter FROM Valid_Question_Overview WHERE Lecture='{select}' ORDER BY Chapter_id;""", dbconn)
@@ -108,7 +117,16 @@ class LearningForest:
         else:
             return chapter, subchapter, False
 
-
+    @staticmethod
+    def check_final(selected_lecture):
+        dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
+        next_chapter = pd.read_sql_query(f"""SELECT Chapter FROM Valid_Question_Overview WHERE Lecture='{selected_lecture}' ORDER BY Chapter_id;""",dbconn)
+        next_chapter = list(next_chapter.values.tolist())
+        dbconn.close()
+        if next_chapter == []:
+            return True
+        else:
+            return False
 
     @staticmethod
     def correct_answer(question):

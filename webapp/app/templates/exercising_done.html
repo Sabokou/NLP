@@ -3,8 +3,8 @@
 {% block heading %}Congratulations{% endblock %}
 {% block body %}
 <div>
-    <h3 style="color: red;">{{ Text }}</h3>
-    <h5>You have been disqualified from chapter {{ Chapter }}</h5>
+    <h3 style="color: {{ color }};">{{ Text }}</h3>
+    <h5> {{ Chapter_Text }}</h5>
     <h5>You are done with the exercises. There are no more chapters left.</h5>
     <h5>You have solved {{ Result }}% of the lecture.</h5>
 </div>

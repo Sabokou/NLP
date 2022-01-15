@@ -272,3 +272,47 @@ BEGIN
 END
 $$
 ;
+
+
+create or replace procedure reset(
+    s_lecture_txt       VARCHAR(100000)
+)
+
+    language plpgsql
+AS
+$$
+DECLARE
+    chapter_id     INT;
+    question        INT;
+    chapter_list    INT[];
+    question_list   INT[];
+    chapter         INT;
+
+BEGIN
+
+    chapter_list := ARRAY(SELECT n_chapter_id FROM CHAPTER WHERE s_lecture = s_lecture_txt);
+    question_list := ARRAY(SELECT n_question_id FROM QUESTIONS WHERE n_chapter_id = ANY(chapter_list));
+    chapter_id := (SELECT MIN(n_chapter_id) FROM CHAPTER WHERE s_lecture = s_lecture_txt);
+
+    FOREACH chapter IN ARRAY chapter_list
+        LOOP
+            UPDATE CHAPTER_RESULTS
+            SET n_qualificated = 0 ,  n_solved = 0
+            WHERE n_chapter_id = chapter;
+        END loop;
+
+    FOREACH question IN ARRAY question_list
+        LOOP
+            UPDATE QUESTION_RESULTS
+            SET n_solved = 0
+            WHERE n_question_id = question;
+        END loop;
+
+    UPDATE CHAPTER_RESULTS
+    SET n_qualificated = 1
+    WHERE n_chapter_id = chapter_id;
+
+
+END
+$$
+;
