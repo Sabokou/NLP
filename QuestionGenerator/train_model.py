@@ -4,15 +4,12 @@ import torch
 from torch.optim import AdamW
 from torch.utils.data import DataLoader, Dataset
 
-# Evaluation method
-from sklearn.metrics import accuracy_score
-
 # Tokenizer for data
 from transformers import AutoTokenizer
 # Based model
 from transformers import T5Config, T5ForConditionalGeneration, T5Tokenizer
 
-# Used for progress
+# Used for progress bar
 from tqdm import tqdm
 
 # Importing dataset class

@@ -1,7 +1,7 @@
 import re
 import torch
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 
 class QuestionGenerator:
@@ -28,7 +28,7 @@ class QuestionGenerator:
         generated_questions = self.generate_questions_from_inputs(qg_inputs)
 
         qa_list = self._get_all_qa_pairs(generated_questions, qg_answers)
-
+        qa_list = self._remove_duplicate_questions(qa_list)
         return qa_list
 
     def generate_qg_inputs(self, text: str) -> Tuple[List[str], List[str]]:
@@ -137,6 +137,24 @@ class QuestionGenerator:
             }
             qa_list.append(qa)
         return qa_list
+
+    @staticmethod
+    def _remove_duplicate_questions(question_list: List[Dict]) -> List[Dict]:
+        """
+        Generator sometimes produces duplicate questions that lead to problems in the database.
+        :param question_list:
+        :return:
+        List
+            List of Question-Answer Dictionaries without duplicates
+        """
+        questions = list()
+        return_list = list()
+        for question_pair in question_list:
+            question = question_pair.get("question")
+            if question not in questions:
+                return_list.append(question_pair)
+
+        return return_list
 
 
 if __name__ == "__main__":
