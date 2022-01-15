@@ -14,7 +14,7 @@ app.config['SECRET_KEY'] = 'mysecretkey'
 ALLOWED_EXTENSIONS = {'docx'}
 
 # General Functions
-def allowed_file(filename): #Tests if the file-type has an allowed extension
+def allowed_file(filename): #Tests if the file-type has an allowed extension - only DOCX is allowed
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -33,15 +33,6 @@ class Uploads:
 
     @staticmethod
     def initial_upload(request): # Initially uploads the docx-file into an Upload-Folder within the WebApp
-        if 'file' not in request.files:
-            flash('No file part')
-            return render_template("/includes/fail.html", title='Error',
-                                   text='No file part')
-        file = request.files['file']
-        if file.filename == '':
-            flash('No selected file')
-            return render_template("/includes/fail.html", title='Error',
-                                   text='No file was selected')
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             path = os.path.join(uploads_dir, filename)
@@ -162,7 +153,7 @@ class Uploads:
         dbconn.close()
 
     @staticmethod
-    def prepare_question_transmission(chapter_data_dict):
+    def prepare_question_transmission(chapter_data_dict): # prepares the questions and answers for the transmission the DB
         list = []
         for key, value in chapter_data_dict.items():
             text=str(value)
@@ -180,7 +171,7 @@ class Uploads:
         return list
 
     @staticmethod
-    def question_transmission_to_DB(level_one_list, list):
+    def question_transmission_to_DB(level_one_list, list): # fills the tables QUESTION and QUESTION_RESULTS
         dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
         myCursor = dbconn.cursor()
         lecture = level_one_list[0][0]

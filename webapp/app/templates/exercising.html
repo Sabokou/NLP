@@ -7,7 +7,7 @@
 
     <form action = "http://localhost:5000/checking" method="POST" enctype = "multipart/form-data">
         <h3 class="mb-3"> {{ lecture }}</h3>
-        <label name= chapter class="form-label">Question (Chapter {{ chapter }})</label>
+        <label name= chapter class="form-label">Question (Chapter: {{ chapter }})</label>
         <input readonly value='{{ question }}' class="mb-3 form-control" name= question>
 
         <label class="form-label">Answer</label>
