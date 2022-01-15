@@ -4,6 +4,9 @@ import os
 from app import app
 from html.parser import HTMLParser
 import psycopg2
+from app.qg import QuestionGenerator
+
+qg = QuestionGenerator()
 
 uploads_dir = os.path.join(app.root_path, 'Uploaded_Docs')
 os.makedirs(uploads_dir, exist_ok=True)
@@ -104,6 +107,7 @@ class Uploads:
         lecture = level_one_list[0][0]
         Content_List = []
         for i in chapter_data_dict:
+            chapter_data_dict[i] = ' '.join(chapter_data_dict[i]).replace("'", "")
             Content_List.append([lecture, i, chapter_data_dict[i]])
         return Content_List
 
@@ -136,6 +140,7 @@ class Uploads:
                     Hierachy_List.append([lecture, i, j])
         return Hierachy_List
 
+
     @staticmethod
     def hierarchy_transmission_to_DB(Hierarchy_List): # fills the hierarchy-table in the database
         dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
@@ -151,7 +156,39 @@ class Uploads:
         dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
         myCursor = dbconn.cursor()
         lecture = level_one_list[0][0]
-        myCursor.execute(f"CALL add_lecture('{lecture}', '{text}')")
+        myCursor.execute(f"""CALL add_lecture('{lecture}', '{text.replace("'", "")}')""")
+        dbconn.commit()
+        myCursor.close()
+        dbconn.close()
+
+    @staticmethod
+    def prepare_question_transmission(chapter_data_dict):
+        list = []
+        for key, value in chapter_data_dict.items():
+            text=str(value)
+            question_answer_dict = qg.generate(str(text))
+            question_answer_list = []
+            for i in range(len(question_answer_dict)):
+                inner_list = []
+                for j in question_answer_dict[i].keys():
+                    inner_list.append(question_answer_dict[i][j])
+                question_answer_list.append(inner_list)
+
+            for i in range(len(question_answer_list)):
+                new_list=[key]+question_answer_list[i]
+                list.append(new_list)
+        return list
+
+    @staticmethod
+    def question_transmission_to_DB(level_one_list, list):
+        dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
+        myCursor = dbconn.cursor()
+        lecture = level_one_list[0][0]
+        for i in range(len(list)):
+            chapter = list[i][0].replace("'", "")
+            question = list[i][1].replace("'", "")
+            answer = list[i][2].replace("'", "")
+            myCursor.execute(f"CALL add_question('{lecture}','{chapter}','{question}', '{answer}')")
         dbconn.commit()
         myCursor.close()
         dbconn.close()

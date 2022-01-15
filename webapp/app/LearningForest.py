@@ -3,9 +3,11 @@ import pandas as pd
 import random
 from app.Uploads import Uploads
 from sklearn.feature_extraction.text import TfidfVectorizer
-#from app.QuestionGenerator.qg import QuestionGenerator
+from app.qg import QuestionGenerator
 
-#qg=QuestionGenerator()
+qg = QuestionGenerator()
+
+
 
 class LearningForest:
 
@@ -30,22 +32,22 @@ class LearningForest:
     @staticmethod
     def upload_process(request): #Upload- and Transmission-Process from a docx-document to the content in the Database
         path = Uploads.initial_upload(request)
-        text = Uploads.convert_to_html(path)
-        MyList = Uploads.parse_html(text)
+        html_text = Uploads.convert_to_html(path)
+        MyList = Uploads.parse_html(html_text)
         chapter_list = Uploads.chapter(MyList)
         level_one_list, level_two_list, level_three_list, level_four_list, level_data_list = Uploads.level(MyList)
         one_two_dict = Uploads.hierarchy(level_one_list, level_two_list)
         two_three_dict = Uploads.hierarchy(level_two_list, level_three_list)
         three_four_dict = Uploads.hierarchy(level_three_list, level_four_list)
         chapter_data_dict = Uploads.hierarchy(chapter_list, level_data_list)
-        for i in chapter_data_dict:
-            chapter_data_dict[i] = ' '.join(chapter_data_dict[i]).replace("'", "")
+        qa_list = Uploads.prepare_question_transmission(chapter_data_dict)
         Content_list = Uploads.prepare_DB_transmission(level_one_list, chapter_data_dict)
         Uploads.transmission_to_DB(Content_list)
-        Hierarchy_list = Uploads.prepare_hierarchy_transmission(level_one_list, one_two_dict, two_three_dict,
-                                                                three_four_dict)
+        Hierarchy_list = Uploads.prepare_hierarchy_transmission(level_one_list, one_two_dict, two_three_dict, three_four_dict)
         Uploads.hierarchy_transmission_to_DB(Hierarchy_list)
-        Uploads.lecture_transmission_to_DB(level_one_list, text.replace("'", ""))
+        Uploads.lecture_transmission_to_DB(level_one_list, html_text)
+        Uploads.question_transmission_to_DB(level_one_list, qa_list)
+
 
     @staticmethod
     def text_generation(request): # generates the text of a lecture for the learning-page
@@ -169,3 +171,4 @@ class LearningForest:
         result = list(result.values.tolist())
         result = result[0][0]*100
         return result
+

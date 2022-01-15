@@ -32,7 +32,7 @@ def uploading_file():
    if request.method == 'POST':
         LF.upload_process(request)
         return render_template("/includes/success.html", title='Success',
-                                   text="Your Data was successfully transmitted to the Database")
+                                   text="Your Data was succesfully transmitted to the Database.")
 
 
 @app.route('/learning', methods=['POST', 'GET'])  # Learning - Page

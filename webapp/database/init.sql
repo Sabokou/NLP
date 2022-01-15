@@ -28,8 +28,8 @@ CREATE TABLE IF NOT EXISTS QUESTIONS
 (
     n_question_id   SERIAL UNIQUE NOT NULL,
     n_chapter_id    INT NOT NULL,
-    s_question      VARCHAR(128)   NOT NULL,
-    s_answer        VARCHAR(128)   NOT NULL,
+    s_question      VARCHAR(10000)   NOT NULL,
+    s_answer        VARCHAR(10000)   NOT NULL,
     PRIMARY KEY (n_question_id),
     FOREIGN KEY (n_chapter_id) REFERENCES CHAPTER (n_chapter_id) ON DELETE CASCADE
 );
@@ -268,7 +268,6 @@ BEGIN
             WHERE n_chapter_id = sub_chapter;
         END loop;
 
-
 END
 $$
 ;
@@ -316,3 +315,35 @@ BEGIN
 END
 $$
 ;
+
+
+
+
+create or replace procedure add_question(
+    s_lecture_txt       VARCHAR(128),
+    s_chapter_txt       VARCHAR(128),
+    s_question_txt      VARCHAR(10000),
+    s_answer_txt        VARCHAR(10000)
+)
+
+    language plpgsql
+AS
+$$
+DECLARE
+    question_id      INT;
+    chapter_id       INT;
+
+BEGIN
+
+    chapter_id := (SELECT n_chapter_id FROM CHAPTER WHERE s_chapter = s_chapter_txt AND s_lecture = s_lecture_txt);
+
+    INSERT INTO QUESTIONS(n_chapter_id, s_question, s_answer)
+    VALUES (chapter_id, s_question_txt, s_answer_txt)
+    RETURNING n_question_id INTO question_id;
+
+    INSERT INTO QUESTION_RESULTS(n_question_id, n_solved)
+    VALUES (question_id, 0);
+END
+$$
+;
+
