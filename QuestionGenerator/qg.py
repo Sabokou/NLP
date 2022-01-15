@@ -26,6 +26,7 @@ class QuestionGenerator:
 
         qg_inputs, qg_answers = self.generate_qg_inputs(text)
         generated_questions = self.generate_questions_from_inputs(qg_inputs)
+        print("Generated questions: {generated_questions}")
 
         qa_list = self._get_all_qa_pairs(generated_questions, qg_answers)
         qa_list = self._remove_duplicate_questions(qa_list)
@@ -152,6 +153,7 @@ class QuestionGenerator:
         for question_pair in question_list:
             question = question_pair.get("question")
             if question not in questions:
+                questions.append(question)
                 return_list.append(question_pair)
 
         return return_list
@@ -159,5 +161,9 @@ class QuestionGenerator:
 
 if __name__ == "__main__":
     qg = QuestionGenerator()
-    output = qg.generate("TEST")
+    output = qg.generate("""Computational linguistics is often grouped within the field of artificial intelligence but was present before the development of artificial intelligence. Computational linguistics originated with efforts in the United States in the 1950s to use computers to automatically translate texts from foreign languages, particularly Russian scientific journals, into English. Since computers can make arithmetic (systematic) calculations much faster and more accurately than humans, it was thought to be only a short matter of time before they could also begin to process language. Computational and quantitative methods are also used historically in the attempted reconstruction of earlier forms of modern languages and sub-grouping modern languages into language families. Earlier methods, such as lexicostatistics and glottochronology, have been proven to be premature and inaccurate. However, recent interdisciplinary studies that borrow concepts from biological studies, especially gene mapping, have proved to produce more sophisticated analytical tools and more reliable results.
+When machine translation (also known as mechanical translation) failed to yield accurate translations right away, automated processing of human languages was recognized as far more complex than had originally been assumed. Computational linguistics was born as the name of the new field of study devoted to developing algorithms and software for intelligently processing language data. The term "computational linguistics" itself was first coined by David Hays, a founding member of both the Association for Computational Linguistics (ACL) and the International Committee on Computational Linguistics (ICCL).
+To translate one language into another, it was observed that one had to understand the grammar of both languages, including both morphology (the grammar of word forms) and syntax (the grammar of sentence structure). To understand syntax, one had to also understand the semantics and the lexicon (or 'vocabulary'), and even something of the pragmatics of language use. Thus, what started as an effort to translate between languages evolved into an entire discipline devoted to understanding how to represent and process natural languages using computers.
+Nowadays research within the scope of computational linguistics is done at computational linguistics departments, computational linguistics laboratories, computer science departments, and linguistics departments. Some research in the field of computational linguistics aims to create working speech or text processing systems while others aim to create a system allowing human-machine interaction. Programs meant for human-machine communication are called conversational agents.
+""")
     print(output)
