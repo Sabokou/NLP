@@ -33,6 +33,7 @@ class Uploads:
 
     @staticmethod
     def initial_upload(request): # Initially uploads the docx-file into an Upload-Folder within the WebApp
+        file = request.files['file']
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             path = os.path.join(uploads_dir, filename)
