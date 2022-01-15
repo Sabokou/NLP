@@ -17,6 +17,7 @@ selected_lecture = ""
 def overview():
     dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
     result = pd.read_sql_query(f"""SELECT * FROM Result_Overview;""", dbconn)
+    result["completed"] = result["completed"].apply(lambda x: str(x*100)+"%")
     return render_template("includes/table.html", column_names=result.columns.values,
                                    row_data=list(result.values.tolist()),
                                    title='Overview', sub_header="Your Results:", link_column='none',
@@ -152,10 +153,11 @@ def evaluating():
                                        Chapter=current_chapter,
                                        Subchapter_Text="",
                                        Next=next_chapter)
+            Subchapter_string = ', '.join([x[0] for x in sub_chapter])
             return render_template("/correct.html",
                                    Text="You classified your answer as correct!",
                                    Chapter=current_chapter,
-                                   Subchapter_Text=f"You have qualified yourself for the following chapters: {sub_chapter}",
+                                   Subchapter_Text=f"You have qualified yourself for the following chapters: {Subchapter_string}",
                                    Next=next_chapter)
         elif request.form.get('incorrect') == 'incorrect':
             dbconn = psycopg2.connect(database="postgres", user="postgres", port=5432, password="securepwd", host="db")
