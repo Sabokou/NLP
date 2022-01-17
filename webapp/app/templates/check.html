@@ -14,10 +14,10 @@
     <input readonly value='{{ correct_answer }}' class="mb-3 form-control" name = correct_answer>
 
     <label class="mb-3 form-label">My answer was ... </label>
-    <div class="d-flex flex-row">
-        <button name=incorrect value="incorrect" class="btn btn-danger">Incorrect *</button>
+    <div class="d-flex flex-row mb-1">
+        <button name=incorrect value="incorrect" class="btn btn-danger me-3">Incorrect *</button>
         <form method="POST" enctype = "multipart/form-data">
-        <button name=correct value="correct" class="btn btn-success me-3">Correct **</button>
+        <button name=correct value="correct" class="btn btn-success">Correct **</button>
         </form>
     </div>
         <div>* I agree with the algorithm that my answer was incorrect. </div>
