@@ -27,12 +27,19 @@ def overview():
 def upload():
     return render_template("/upload.html")
 
-@app.route('/uploader', methods = ['GET', 'POST']) # Success-Page after an Document has been upload
+@app.route('/uploader', methods = ['GET', 'POST']) # Upload-Process for a document
 def uploading_file():
    if request.method == 'POST':
-        LF.upload_process(request) # Upload-Procedure for a docx-document into the database - details in LearningForest.py
-        return render_template("/includes/success.html", title='Success',
-                                   text="Your Data was succesfully transmitted to the Database.")
+       file = request.files['file']
+       if file.filename == '': # Trouble-Shooting, if no file was selected
+           flash('No selected file')
+           return render_template("/includes/fail.html", title='Error',
+                                  text='No file was selected')
+       else:
+           LF.upload_process(request)  # Upload-Procedure for a docx-document into the database - details in LearningForest.py
+           return render_template("/includes/success.html", title='Success', # Success-Page after an Document has been upload
+                                  text="Your Data was succesfully transmitted to the Database.")
+
 
 
 @app.route('/learning', methods=['POST', 'GET'])  # Learning - Page
