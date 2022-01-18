@@ -3,6 +3,7 @@ import torch
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from typing import List, Tuple, Dict
 
+# Functional Copy of QuestionGenerator/qg.py
 
 class QuestionGenerator:
 
