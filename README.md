@@ -16,8 +16,9 @@ The "Learning Forest" was developed in the course of an NLP project at DHBW Mann
 
 **Setup**
 1. install docker (including docker-compose)
-2. navigate to NLP/webapp/app
-3. run "docker-compose up"
+2. navigate to NLP/webapp
+3. run "docker-compose up" or "docker-compose up --build"
+    - If there are any problems, try "docker-compose down --volumes" or "docker kill $(docker ps -q)"
     - the build process may take a while
 4. Once done you can navigate to "localhost:5000" in your browser
 
