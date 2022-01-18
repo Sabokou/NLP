@@ -39,4 +39,4 @@ The "Learning Forest" was developed in the course of an NLP project at DHBW Mann
     - Password: "securepwd"
 
 **Documentation**
-- Within the documents "upload-process.png" and "exercise-process.png", you can see a flowchart for the upload- and exercise-process
+- Within the documents "upload-prozess.png" and "exercise-prozess.png", you can see a flowchart for the upload- and exercise-process
