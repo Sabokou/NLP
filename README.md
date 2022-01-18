@@ -25,7 +25,7 @@ The "Learning Forest" was developed in the course of an NLP project at DHBW Mann
 **Using the webapp**
 1. upload your document (.docx)
     - be sure that your document follows the needed structure
-    - you can also use our example (example-computational-linguistics.docx)
+    - you can also use our example (example-computational-linguistics.docx in the Documentation-Folder)
     - the question generation can take 1-3min depending on your hardware
 2. now you can use the learning and exercise pages as much as you want!
 
@@ -40,3 +40,5 @@ The "Learning Forest" was developed in the course of an NLP project at DHBW Mann
 
 **Documentation**
 - Within the documents "upload-prozess.png" and "exercise-prozess.png", you can see a flowchart for the upload- and exercise-process
+- The document "Präsentation" is corresponding to the presentation held on 18.01.2022
+- There is an example-document to check the upload-process, named example-computational-linguistics.docx: 
