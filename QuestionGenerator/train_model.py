@@ -87,7 +87,7 @@ class ModelTrainer:
         self.optimizer = AdamW(self.model.parameters(), lr=1e-3)
 
         # setup loss measurement for training
-        self.train_loss = AccuracyScore()
+        self.train_loss = Accuracy_Score()
 
         # setup accuracy storage for validation
         self.best_accuracy = 0
@@ -190,11 +190,18 @@ class ModelTrainer:
         return model
 
     @staticmethod
-    def _get_accuracy(y_pred, y_true):
+    def _get_accuracy(y_pred, y_true) -> float:
+        """
+        Calculate the Accuracy by comparing labels token by token.
+        :param y_pred:
+        :param y_true:
+        :return:
+        """
+        # Get amount of equal tensors
         _, count = torch.unique(y_pred[y_pred == y_true], return_counts=True)
         summe = torch.sum(count).item()
-        # print("\n\nCount: ", count)
-        # print("Sum: ", sum)
+
+        # return amount divided by length for average correctness
         return summe/1024
 
 
