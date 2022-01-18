@@ -9,6 +9,11 @@ The "Learning Forest" was developed in the course of an NLP project at DHBW Mann
 - Phillip Lange (5920414)
 - Simon Schmid (9917195)
 
+**Development Teams**
+- Webapp (Alina Buss, Andreas Dichter)
+- Answer-Checker (Can Berkil, Simon Schmid)
+- Question-Generator (Paula Hölterhoff, Phillip Lange)
+
 **Setup**
 1. install docker (including docker-compose)
 2. navigate to NLP/webapp/app
